@@ -1,0 +1,2715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#2E3192">
+<title>IHF Triage: Workload & Vigilance Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#2E3192;
+  --navy-deep:#1A1B4B;
+  --navy-soft:#3D40A8;
+  --coral:#F08080;
+  --coral-deep:#E16C6C;
+  --coral-soft:#FCD9D9;
+  --white:#FFFFFF;
+  --lavender:#EDEAF7;
+  --lavender-deep:#DDD8EE;
+  --grey:#8A8FA8;
+  --grey-light:#D4D2E3;
+  --red:#E5535B;
+  --orange:#F2A14F;
+  --yellow:#E5C04A;
+  --green:#5B9D7F;
+  --purple:#6E5BAA;
+  --r-sm:12px;
+  --r-md:16px;
+  --r-lg:22px;
+  --r-xl:28px;
+  --r-pill:999px;
+  --shadow-sm:0 2px 8px rgba(26,27,75,0.06);
+  --shadow-md:0 8px 24px rgba(26,27,75,0.12);
+  --shadow-lg:0 18px 42px rgba(26,27,75,0.18);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+*:focus{outline:none;}
+*:focus-visible{outline:2px solid var(--coral);outline-offset:2px;border-radius:6px;}
+
+html,body{
+  font-family:'Poppins',system-ui,-apple-system,sans-serif;
+  background:var(--lavender);
+  color:var(--navy-deep);
+  font-size:15px;
+  line-height:1.5;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+}
+
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit;}
+ul,ol{list-style:none;}
+img,svg{display:block;max-width:100%;}
+
+/* ============ APP SHELL ============ */
+.app{
+  max-width:480px;
+  margin:0 auto;
+  min-height:100vh;
+  background:var(--lavender);
+  position:relative;
+  overflow-x:hidden;
+}
+
+.screen{display:none;animation:fade .35s ease;}
+.screen.active{display:block;}
+@keyframes fade{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ============ USERNAME SCREEN ============ */
+#screen-username{min-height:100vh;background:var(--lavender);display:none;}
+#screen-username.active{display:flex;flex-direction:column;}
+#screen-facilitator{min-height:100vh;background:var(--lavender);display:none;}
+#screen-facilitator.active{display:flex;flex-direction:column;}
+.username-wrap{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding:2rem 1.5rem;max-width:480px;margin:0 auto;width:100%;
+}
+.username-brand{
+  display:flex;align-items:center;gap:0.5rem;
+  color:var(--navy);font-weight:700;font-size:0.9rem;
+  text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1.5rem;
+}
+.username-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--coral);}
+.username-title{
+  font-size:1.85rem;font-weight:800;color:var(--navy-deep);
+  line-height:1.15;margin-bottom:0.65rem;
+}
+.username-sub{
+  font-size:0.98rem;color:var(--navy);line-height:1.5;margin-bottom:2rem;
+}
+.username-card{
+  background:#fff;border-radius:16px;padding:1.5rem;
+  box-shadow:0 8px 24px rgba(26,27,75,0.08);
+}
+.username-label{
+  font-size:0.82rem;font-weight:600;color:var(--navy-deep);
+  text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;display:block;
+}
+.username-input{
+  width:100%;padding:0.85rem 1rem;font-size:1rem;font-family:inherit;
+  border:2px solid #e4e6f2;border-radius:10px;color:var(--navy-deep);
+  background:#fafbff;transition:border-color .2s,background .2s;
+  box-sizing:border-box;
+}
+.username-input:focus{outline:none;border-color:var(--navy);background:#fff;}
+.username-hint{
+  font-size:0.8rem;color:var(--grey);margin-top:0.5rem;line-height:1.4;
+}
+.username-error{
+  font-size:0.85rem;color:var(--coral);margin-top:0.5rem;font-weight:600;
+  min-height:1.2em;
+}
+.username-actions{margin-top:1.25rem;}
+.username-actions .btn{width:100%;justify-content:center;}
+
+/* ============ LEADERBOARD ============ */
+.leaderboard-block{
+  padding:0 1.5rem 0.5rem;margin-top:0.5rem;
+}
+.leaderboard-title{
+  font-size:0.82rem;font-weight:700;color:var(--navy-deep);
+  text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.65rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.leaderboard-live{
+  font-size:0.7rem;color:var(--coral);font-weight:700;
+  display:flex;align-items:center;gap:0.35rem;
+}
+.leaderboard-live::before{
+  content:'';width:6px;height:6px;border-radius:50%;background:var(--coral);
+  animation:lbPulse 1.4s ease-in-out infinite;
+}
+@keyframes lbPulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+.leaderboard-list{
+  background:#fafbff;border-radius:10px;padding:0.5rem;
+  max-height:280px;overflow-y:auto;
+}
+.lb-row{
+  display:grid;grid-template-columns:24px 1fr auto auto;gap:0.5rem;
+  align-items:center;padding:0.4rem 0.5rem;font-size:0.85rem;
+  border-radius:6px;
+}
+.lb-row.me{background:rgba(255,107,107,0.12);}
+.lb-rank{font-weight:700;color:var(--grey);text-align:center;}
+.lb-name{font-weight:600;color:var(--navy-deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-level{font-size:0.75rem;color:var(--navy);font-weight:600;}
+.lb-score{font-weight:800;color:var(--navy-deep);}
+.lb-empty{padding:0.75rem;text-align:center;color:var(--grey);font-size:0.85rem;}
+.lb-status{padding:0.5rem 0.75rem;font-size:0.78rem;color:var(--grey);text-align:center;}
+
+/* ============ LEADERBOARD TOGGLE ============ */
+.lb-toggle{
+  display:flex;background:#eef0f8;border-radius:8px;padding:3px;margin-bottom:0.6rem;
+}
+.lb-toggle button{
+  flex:1;border:none;background:transparent;padding:0.5rem 0.5rem;
+  font-family:inherit;font-size:0.82rem;font-weight:700;color:var(--grey);
+  border-radius:6px;cursor:pointer;transition:background .15s,color .15s;
+  text-transform:uppercase;letter-spacing:0.04em;
+}
+.lb-toggle button.active{background:#fff;color:var(--navy-deep);box-shadow:0 1px 3px rgba(26,27,75,0.08);}
+
+/* Overall-run rows have 5 columns: rank, name, levels, best, total */
+.lb-row.overall{grid-template-columns:24px 1fr auto auto auto;}
+.lb-row.overall .lb-levels{font-size:0.72rem;color:var(--navy);font-weight:600;}
+.lb-row.overall .lb-best{font-size:0.72rem;color:var(--grey);font-weight:600;}
+.lb-count{
+  font-size:0.78rem;color:var(--navy);font-weight:600;
+  margin-bottom:0.55rem;padding:0.35rem 0.65rem;
+  background:rgba(46,49,146,0.06);border-radius:6px;text-align:center;
+}
+
+/* ============ HISTORICAL AVERAGES ============ */
+.hist-block{padding:0 1.5rem 0.5rem;margin-top:1rem;}
+.hist-title{
+  font-size:0.82rem;font-weight:700;color:var(--navy-deep);
+  text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.65rem;
+}
+.hist-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;
+  background:#fafbff;border-radius:10px;padding:0.65rem;
+}
+.hist-stat{text-align:center;}
+.hist-stat .hs-label{
+  font-size:0.68rem;color:var(--grey);text-transform:uppercase;
+  letter-spacing:0.05em;margin-bottom:0.2rem;font-weight:600;
+}
+.hist-stat .hs-value{font-size:1.05rem;font-weight:800;color:var(--navy-deep);}
+.hist-compare{
+  margin-top:0.55rem;padding:0.55rem 0.75rem;border-radius:8px;
+  font-size:0.83rem;line-height:1.35;font-weight:600;text-align:center;
+}
+.hist-compare.above{background:rgba(46,49,146,0.08);color:var(--navy-deep);}
+.hist-compare.below{background:rgba(255,107,107,0.12);color:var(--navy-deep);}
+.hist-compare.inline{background:#fafbff;color:var(--navy);}
+.hist-status{padding:0.5rem 0.75rem;font-size:0.78rem;color:var(--grey);text-align:center;}
+
+/* ============ COMMON ============ */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.5rem;
+  font-weight:600;
+  border-radius:var(--r-pill);
+  padding:0.95rem 1.5rem;
+  min-height:52px;
+  font-size:1rem;
+  transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+  text-align:center;
+  width:100%;
+}
+.btn:active{transform:scale(0.97);}
+.btn-primary{
+  background:var(--coral);
+  color:var(--white);
+  box-shadow:0 6px 18px rgba(240,128,128,0.45);
+}
+.btn-primary:hover{background:var(--coral-deep);}
+.btn-outline{
+  background:transparent;
+  color:var(--coral);
+  border:2px solid var(--coral);
+}
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:0.4rem;
+  padding:0.4rem 0.85rem;
+  border-radius:var(--r-pill);
+  font-size:0.78rem;
+  font-weight:600;
+  background:var(--lavender);
+  color:var(--navy-deep);
+  white-space:nowrap;
+}
+
+.icon-badge{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  border:2.5px solid var(--coral);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--white);
+  color:var(--coral);
+  flex-shrink:0;
+  font-size:1.15rem;
+  font-weight:700;
+}
+
+/* ============ INTRO ============ */
+#screen-intro{min-height:100vh;background:var(--lavender);}
+
+.intro-hero{
+  background:var(--navy);
+  color:var(--white);
+  padding:2.5rem 1.75rem 5rem;
+  position:relative;
+  border-bottom-left-radius:55% 14%;
+  overflow:hidden;
+}
+.intro-hero::before{
+  content:'';position:absolute;
+  top:-40px;right:-40px;
+  width:140px;height:140px;border-radius:50%;
+  background:rgba(240,128,128,0.12);
+}
+.intro-hero::after{
+  content:'';position:absolute;
+  bottom:30px;left:-30px;
+  width:90px;height:90px;border-radius:50%;
+  background:rgba(240,128,128,0.08);
+}
+.intro-brand{
+  display:flex;align-items:center;gap:0.5rem;
+  font-size:0.72rem;font-weight:700;letter-spacing:0.18em;
+  color:var(--coral);text-transform:uppercase;
+  margin-bottom:1rem;position:relative;z-index:1;
+}
+.intro-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--coral);}
+.intro-title{
+  font-size:2.1rem;font-weight:800;color:var(--coral);
+  line-height:1.1;margin-bottom:0.65rem;position:relative;z-index:1;
+}
+.intro-sub{
+  color:rgba(255,255,255,0.85);font-size:0.95rem;
+  max-width:30ch;position:relative;z-index:1;
+}
+
+.intro-card{
+  background:var(--white);
+  margin:-3rem 1rem 1.5rem;
+  padding:1.85rem 1.4rem 1.4rem;
+  border-radius:var(--r-xl);
+  border-top-right-radius:60px;
+  box-shadow:var(--shadow-md);
+  position:relative;z-index:2;
+}
+
+.intro-section{margin-bottom:1.35rem;}
+.intro-section:last-child{margin-bottom:0;}
+.intro-section h3{
+  font-size:1rem;font-weight:700;color:var(--navy-deep);
+  margin-bottom:0.75rem;
+}
+
+.step-row{
+  display:flex;align-items:center;gap:1rem;
+  padding:0.5rem 0;
+}
+.step-row .step-text{font-size:0.92rem;color:var(--navy-deep);line-height:1.4;}
+.step-row .step-text strong{color:var(--coral);font-weight:700;}
+
+.rules-list{display:flex;flex-direction:column;gap:0.45rem;}
+.rule-item{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.65rem 0.85rem;
+  background:var(--lavender);border-radius:var(--r-md);
+  font-size:0.85rem;
+}
+.rule-item .swatch{width:14px;height:14px;border-radius:4px;flex-shrink:0;}
+.rule-item strong{color:var(--navy-deep);font-weight:700;}
+
+.intro-actions{
+  margin-top:1.5rem;display:flex;flex-direction:column;
+  gap:0.3rem;align-items:center;
+}
+.intro-actions .link-btn{
+  color:var(--coral);font-weight:600;padding:0.6rem;font-size:0.92rem;
+}
+
+/* ============ LEVELS ============ */
+#screen-levels{min-height:100vh;}
+.levels-hero{
+  background:var(--navy);color:var(--white);
+  padding:2rem 1.5rem 3.5rem;
+  border-bottom-left-radius:50% 12%;
+  display:flex;align-items:center;gap:0.85rem;
+}
+.back-btn{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--coral);font-size:1.4rem;font-weight:700;
+  background:rgba(255,255,255,0.06);
+}
+.levels-hero h2{font-size:1.5rem;font-weight:800;color:var(--coral);}
+
+.levels-grid{
+  padding:1.25rem 1rem 2rem;
+  margin-top:-2rem;position:relative;z-index:2;
+  display:flex;flex-direction:column;gap:0.85rem;
+}
+
+.level-card{
+  background:var(--white);border-radius:var(--r-lg);
+  padding:1.05rem 1.1rem;display:flex;align-items:center;gap:1rem;
+  box-shadow:var(--shadow-sm);cursor:pointer;
+  transition:transform .15s ease, box-shadow .2s ease;
+  border:2px solid transparent;text-align:left;width:100%;
+}
+.level-card:active{transform:scale(0.98);}
+.level-card:hover{box-shadow:var(--shadow-md);border-color:var(--coral-soft);}
+.level-num{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--navy);color:var(--coral);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:1.1rem;flex-shrink:0;
+}
+.level-info{flex:1;min-width:0;}
+.level-info h4{font-size:1rem;font-weight:700;color:var(--navy-deep);margin-bottom:0.15rem;}
+.level-info p{font-size:0.8rem;color:var(--grey);line-height:1.35;}
+.level-arrow{color:var(--coral);font-size:1.2rem;font-weight:700;}
+
+/* ============ GAME SCREEN (one-screen mobile layout) ============ */
+#screen-game{
+  background:var(--lavender);
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+}
+
+.top-bar{
+  background:var(--navy);
+  color:var(--white);
+  padding:0.55rem 0.85rem;
+  display:flex;align-items:center;gap:0.4rem;
+  flex:0 0 auto;
+  z-index:50;
+  box-shadow:0 4px 16px rgba(26,27,75,0.15);
+}
+.brand-mini{
+  display:flex;align-items:center;gap:0.45rem;
+  font-weight:700;font-size:0.78rem;color:var(--coral);
+  margin-right:auto;
+}
+.brand-mini .logo-mark{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--coral);color:var(--white);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:0.72rem;
+}
+.top-bar .level-tag{
+  background:rgba(255,255,255,0.12);
+  color:var(--white);
+  padding:0.3rem 0.65rem;
+  border-radius:var(--r-pill);
+  font-size:0.72rem;
+  font-weight:700;
+}
+.icon-btn{
+  width:36px;height:36px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  color:var(--white);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.95rem;
+  flex-shrink:0;
+}
+.icon-btn:hover{background:rgba(255,255,255,0.18);}
+.icon-btn.coral{background:var(--coral);color:var(--white);}
+.clock-pill{
+  background:var(--coral);color:var(--white);
+  font-weight:700;
+  padding:0.32rem 0.7rem;
+  border-radius:var(--r-pill);
+  font-size:0.75rem;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Game body, fills space between top and bottom bars */
+.game-body{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  padding:0.6rem 0.6rem 0.5rem;
+  gap:0.5rem;
+  min-height:0;
+  overflow:hidden;
+}
+
+/* Compact banner */
+.banner{
+  flex:0 0 auto;
+  background:var(--navy);
+  color:var(--white);
+  border-radius:var(--r-md);
+  padding:0.6rem 0.85rem;
+  position:relative;
+  overflow:hidden;
+}
+.banner::before{
+  content:'';
+  position:absolute;
+  top:-20px;right:-20px;
+  width:70px;height:70px;border-radius:50%;
+  background:rgba(240,128,128,0.15);
+}
+.banner-row1{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:0.5rem;
+  position:relative;z-index:1;
+  margin-bottom:0.15rem;
+}
+.banner-title{
+  font-size:0.62rem;font-weight:700;letter-spacing:0.14em;
+  color:var(--coral);text-transform:uppercase;
+}
+.banner-step{
+  font-size:0.62rem;font-weight:600;color:rgba(255,255,255,0.55);
+}
+.banner-body{
+  font-size:0.82rem;font-weight:500;color:var(--white);
+  line-height:1.35;position:relative;z-index:1;
+}
+.banner-body .tag{
+  display:inline-block;
+  background:var(--coral);color:var(--white);
+  padding:0.08rem 0.5rem;
+  border-radius:var(--r-pill);
+  font-weight:700;font-size:0.74rem;
+  margin:0 0.05rem;white-space:nowrap;
+}
+.banner-body em{font-style:normal;font-weight:700;color:var(--coral);}
+
+/* Queue */
+.queue-section{
+  flex:0 0 auto;
+  background:var(--white);
+  border-radius:var(--r-lg);
+  padding:0.55rem 0.65rem 0.65rem;
+  box-shadow:var(--shadow-sm);
+}
+.queue-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:0.45rem;
+}
+.queue-header h3{
+  font-size:0.78rem;font-weight:700;color:var(--navy-deep);
+  display:flex;align-items:center;gap:0.4rem;
+  text-transform:uppercase;letter-spacing:0.08em;
+}
+.queue-header .count-pill{
+  background:var(--lavender);color:var(--navy-deep);
+  font-size:0.68rem;font-weight:700;
+  padding:0.2rem 0.55rem;border-radius:var(--r-pill);
+}
+.queue-list{
+  display:flex;flex-direction:column;gap:0.38rem;
+}
+.queue-empty{
+  text-align:center;padding:1rem 0.5rem;
+  color:var(--grey);font-size:0.8rem;
+}
+.queue-overflow{
+  text-align:center;
+  font-size:0.72rem;font-weight:600;
+  color:var(--grey);
+  padding:0.3rem 0;
+}
+
+.patient-row{
+  display:flex;align-items:center;gap:0.55rem;
+  padding:0.55rem 0.7rem 0.55rem 0.4rem;
+  background:var(--white);
+  border:1.5px solid var(--lavender);
+  border-radius:var(--r-md);
+  position:relative;overflow:hidden;
+  cursor:grab;
+  transition:all .15s ease;
+  text-align:left;width:100%;
+  min-height:54px;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+}
+.patient-row:active{cursor:grabbing;}
+.patient-row .urgency-strip{
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:6px;
+  border-top-left-radius:var(--r-md);
+  border-bottom-left-radius:var(--r-md);
+}
+.patient-row .p-info{flex:1;min-width:0;padding-left:0.3rem;}
+.patient-row .p-name{
+  font-weight:700;font-size:0.85rem;color:var(--navy-deep);
+  margin-bottom:0.1rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  display:flex;align-items:center;gap:0.35rem;
+}
+.patient-row .p-name .amb-badge{
+  background:var(--coral);color:var(--white);
+  font-size:0.55rem;font-weight:800;
+  padding:0.05rem 0.35rem;
+  border-radius:var(--r-pill);
+  letter-spacing:0.04em;
+}
+.patient-row .p-tag{
+  font-size:0.7rem;color:var(--grey);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.patient-row.dragging{opacity:0.3;transform:scale(0.96);}
+.timer-pill{
+  font-weight:700;font-size:0.78rem;
+  padding:0.3rem 0.55rem;
+  border-radius:var(--r-pill);
+  background:var(--lavender);color:var(--navy-deep);
+  font-variant-numeric:tabular-nums;
+  min-width:42px;text-align:center;
+}
+.timer-pill.warn{background:#FFE7CC;color:#A05A12;}
+.timer-pill.danger{background:#FFD2D4;color:#9C2A30;animation:pulse 0.7s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+
+.diag-mini{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--lavender);color:var(--purple);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;font-weight:700;flex-shrink:0;
+  border:1.5px solid var(--purple);
+  margin-right:0.2rem;
+}
+.diag-mini:active{transform:scale(0.92);}
+.diag-mini.busy{opacity:0.4;}
+
+/* Floor plan */
+.floor-plan{
+  flex:1 1 auto;
+  background:var(--white);
+  border-radius:var(--r-lg);
+  padding:0.6rem;
+  box-shadow:var(--shadow-sm);
+  display:flex;flex-direction:column;
+  min-height:0;
+}
+.floor-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:0.5rem;
+  flex:0 0 auto;
+}
+.floor-header h3{
+  font-size:0.78rem;font-weight:700;color:var(--navy-deep);
+  text-transform:uppercase;letter-spacing:0.08em;
+}
+.staff-pips{
+  display:flex;gap:3px;
+}
+.staff-pip{
+  width:11px;height:11px;border-radius:50%;
+  background:var(--green);
+  position:relative;
+}
+.staff-pip.working{background:var(--orange);}
+.staff-pip.break{background:var(--purple);}
+.staff-pip.fatigued{background:var(--red);}
+
+.floor-grid{
+  flex:1 1 auto;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:auto 1fr 1fr;
+  gap:0.4rem;
+  min-height:0;
+}
+.room{
+  border-radius:var(--r-md);
+  padding:0.35rem 0.3rem;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:0.15rem;
+  border:2px solid var(--lavender);
+  background:var(--white);
+  transition:transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+  position:relative;overflow:hidden;
+  font-family:inherit;
+  min-height:0;
+}
+.room.entrance{
+  grid-column:1 / -1;
+  min-height:36px;
+  background:var(--navy);color:var(--white);
+  border-color:var(--navy);
+  flex-direction:row;gap:0.5rem;
+  font-weight:600;font-size:0.72rem;
+  padding:0.3rem 0.6rem;
+}
+.room.entrance .room-icon{background:var(--coral);color:var(--white);}
+.room.decorative{background:var(--lavender);color:var(--grey);}
+.room-icon{
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--lavender);color:var(--navy);
+  font-size:0.7rem;font-weight:800;
+  flex-shrink:0;
+}
+.room-label{
+  font-size:0.62rem;font-weight:700;color:var(--navy-deep);
+  line-height:1.1;text-align:center;
+}
+.room-cap{
+  font-size:0.56rem;color:var(--grey);font-weight:600;
+}
+.room.trauma .room-icon{background:#FFD2D4;color:var(--red);}
+.room.consult .room-icon{background:#FFE7CC;color:#B97324;}
+.room.waiting .room-icon{background:#D6EBDF;color:var(--green);}
+.room.trauma{border-color:#E5535B;background:#FFE9EB;}
+.room.consult{border-color:#F2A14F;background:#FFF0D9;}
+.room.waiting{border-color:#5B9D7F;background:#E4F1EA;}
+.room.cleaning{border-color:#B8BCC9;background:#E8E9F0;filter:grayscale(0.85);opacity:0.55;}
+.room.cleaning::after{
+  content:'CLEAN';
+  position:absolute;top:3px;right:4px;
+  font-size:0.5rem;font-weight:800;
+  color:var(--grey);background:var(--white);
+  padding:1px 4px;border-radius:var(--r-pill);
+}
+.room .occupants{
+  position:absolute;bottom:3px;right:5px;
+  display:flex;gap:2px;
+}
+.room .occupant-dot{
+  width:5px;height:5px;border-radius:50%;background:var(--coral);
+}
+
+/* Drag-and-drop visual states on rooms */
+.room.drop-valid{
+  border-color:var(--green);
+  background:#E0F2E8;
+  animation:validPulse 1.6s ease-in-out infinite;
+}
+@keyframes validPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(91,157,127,0.3);}
+  50%{box-shadow:0 0 0 6px rgba(91,157,127,0);}
+}
+.room.drop-invalid{opacity:0.35;filter:saturate(0.4);}
+.room.drop-hover{transform:scale(1.05);box-shadow:0 6px 16px rgba(26,27,75,0.25);}
+.room.drop-hover.drop-valid{
+  transform:scale(1.07);
+  background:#C8E6D2;
+  box-shadow:0 10px 24px rgba(91,157,127,0.45);
+  animation:none;
+}
+.room.drop-hover.drop-invalid{
+  background:repeating-linear-gradient(45deg,#FFD2D4,#FFD2D4 6px,#FFE7E8 6px,#FFE7E8 12px);
+  border-color:var(--red);
+  opacity:0.7;
+}
+.room.rejected{animation:reject .5s ease;}
+@keyframes reject{
+  0%,100%{background:var(--white);}
+  20%,60%{background:repeating-linear-gradient(45deg,#FFD2D4,#FFD2D4 6px,#FFE7E8 6px,#FFE7E8 12px);border-color:var(--red);}
+  40%,80%{transform:translateX(-4px);}
+}
+
+/* Bottom bar (non-fixed, in flex flow) */
+.bottom-bar{
+  flex:0 0 auto;
+  background:var(--navy);color:var(--white);
+  display:flex;justify-content:space-around;
+  padding:0.55rem 0.5rem calc(0.55rem + env(safe-area-inset-bottom,0px));
+  border-top-left-radius:var(--r-lg);
+  border-top-right-radius:var(--r-lg);
+  box-shadow:0 -8px 20px rgba(26,27,75,0.15);
+}
+.bottom-stat{text-align:center;flex:1;min-width:0;}
+.bottom-stat .bs-label{
+  font-size:0.55rem;color:rgba(255,255,255,0.65);
+  font-weight:700;text-transform:uppercase;letter-spacing:0.05em;
+  margin-bottom:0.1rem;
+}
+.bottom-stat .bs-value{
+  font-size:0.95rem;font-weight:800;color:var(--coral);
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.bottom-stat .bs-value.danger{color:#FFB6B9;}
+
+/* Drag ghost */
+.drag-ghost{
+  position:fixed;
+  z-index:9999;
+  pointer-events:none;
+  background:var(--white);
+  border-radius:var(--r-lg);
+  box-shadow:0 24px 50px rgba(26,27,75,0.45);
+  width:260px;
+  transform:translate(-50%,-115%);
+  overflow:hidden;
+  display:flex;
+  border:2.5px solid var(--coral);
+  font-size:0.78rem;
+}
+.ghost-strip{width:8px;flex-shrink:0;}
+.ghost-body{padding:0.65rem 0.75rem;flex:1;min-width:0;}
+.ghost-name{
+  font-weight:700;color:var(--navy-deep);font-size:0.92rem;
+  display:flex;align-items:center;gap:0.35rem;
+}
+.ghost-meta{font-size:0.68rem;color:var(--grey);margin:0.1rem 0 0.55rem;}
+.ghost-vitals{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0.3rem;margin-bottom:0.5rem;
+}
+.ghost-vital{
+  background:var(--lavender);
+  border-radius:var(--r-sm);
+  padding:0.35rem 0.25rem;
+  text-align:center;
+}
+.ghost-vital span{
+  display:block;color:var(--grey);font-weight:700;
+  font-size:0.5rem;text-transform:uppercase;
+  letter-spacing:0.05em;
+}
+.ghost-vital strong{
+  color:var(--navy-deep);font-size:0.78rem;font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.ghost-vital.ab{background:#FFE0E2;}
+.ghost-vital.ab strong{color:#9C2A30;}
+.ghost-vital.hide strong{filter:blur(5px);color:var(--grey);}
+.ghost-symptoms{display:flex;flex-direction:column;gap:0.15rem;}
+.ghost-sym{
+  font-size:0.7rem;color:var(--navy-deep);line-height:1.3;
+  display:flex;gap:0.35rem;
+}
+.ghost-sym::before{
+  content:'';width:4px;height:4px;border-radius:50%;
+  background:var(--coral);flex-shrink:0;margin-top:0.45rem;
+}
+.ghost-sym.hidden{color:var(--purple);font-weight:600;}
+.ghost-sym.hidden::before{background:var(--purple);}
+
+/* ============ END SCREEN ============ */
+#screen-end{min-height:100vh;}
+.end-hero{
+  background:var(--navy);color:var(--white);
+  padding:2rem 1.5rem 4rem;
+  border-bottom-left-radius:50% 12%;
+  text-align:center;
+}
+.end-hero .small-label{
+  font-size:0.7rem;font-weight:700;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--coral);margin-bottom:0.5rem;
+}
+.end-hero h2{font-size:1.6rem;font-weight:800;color:var(--coral);}
+
+.grade-wrap{
+  margin:-3rem 1.5rem 0;
+  background:var(--white);
+  border-radius:var(--r-xl);
+  border-top-right-radius:50px;
+  box-shadow:var(--shadow-md);
+  padding:2rem 1.5rem;text-align:center;
+  position:relative;z-index:2;
+}
+.grade-circle{
+  width:130px;height:130px;border-radius:50%;
+  background:var(--coral);color:var(--white);
+  margin:0 auto 1rem;
+  display:flex;align-items:center;justify-content:center;
+  font-size:4.5rem;font-weight:800;
+  box-shadow:0 12px 28px rgba(240,128,128,0.4);
+  line-height:1;
+}
+.grade-circle.A{background:linear-gradient(135deg,#5B9D7F,#3B8266);box-shadow:0 12px 28px rgba(91,157,127,0.4);}
+.grade-circle.B{background:linear-gradient(135deg,#F0B080,#E69C68);box-shadow:0 12px 28px rgba(240,176,128,0.4);}
+.grade-circle.C{background:linear-gradient(135deg,#F08080,#E16C6C);}
+.grade-circle.D{background:linear-gradient(135deg,#B97595,#9E5D7C);}
+.grade-circle.F{background:linear-gradient(135deg,#7A5BAA,#5E4690);}
+
+.grade-message{font-size:1.1rem;font-weight:700;color:var(--navy-deep);margin-bottom:0.35rem;}
+.grade-sub{font-size:0.88rem;color:var(--grey);margin-bottom:1.5rem;}
+
+.end-stats{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:0.55rem;margin-bottom:1.25rem;
+}
+.end-stat{
+  background:var(--lavender);border-radius:var(--r-md);
+  padding:0.8rem;text-align:left;
+}
+.end-stat .es-label{
+  font-size:0.66rem;color:var(--grey);font-weight:600;
+  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;
+}
+.end-stat .es-value{font-size:1.15rem;font-weight:800;color:var(--navy-deep);}
+
+.end-actions{
+  padding:0 1.5rem 2rem;
+  display:flex;flex-direction:column;gap:0.5rem;margin-top:1rem;
+}
+.end-actions .link-btn{
+  color:var(--coral);font-weight:600;padding:0.6rem;font-size:0.92rem;
+}
+
+/* ============ HELP OVERLAY ============ */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(26,27,75,0.65);
+  z-index:100;display:none;
+  align-items:flex-end;justify-content:center;
+  animation:fade .25s ease;
+}
+.overlay.active{display:flex;}
+.overlay-card{
+  background:var(--lavender);
+  width:100%;max-width:480px;
+  max-height:92vh;overflow-y:auto;
+  border-top-left-radius:var(--r-xl);
+  border-top-right-radius:var(--r-xl);
+  animation:slideUp .35s ease;
+}
+@keyframes slideUp{
+  from{transform:translateY(50px);opacity:0;}
+  to{transform:translateY(0);opacity:1;}
+}
+.overlay-card .intro-hero{
+  border-top-left-radius:var(--r-xl);
+  border-top-right-radius:var(--r-xl);
+}
+.overlay-card .end-hero{
+  border-top-left-radius:var(--r-xl);
+  border-top-right-radius:var(--r-xl);
+}
+.close-x{
+  position:absolute;top:1rem;right:1rem;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,0.12);color:var(--white);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;z-index:3;
+}
+
+/* Toasts */
+.toast-wrap{
+  position:fixed;top:80px;
+  left:50%;transform:translateX(-50%);
+  z-index:200;
+  display:flex;flex-direction:column;gap:0.4rem;
+  pointer-events:none;width:90%;max-width:380px;
+}
+.toast{
+  background:var(--navy-deep);color:var(--white);
+  padding:0.65rem 0.95rem;
+  border-radius:var(--r-md);
+  font-size:0.82rem;font-weight:600;
+  box-shadow:var(--shadow-md);
+  animation:toastIn .3s ease, toastOut .3s ease 1.7s forwards;
+}
+.toast.success{background:var(--green);}
+.toast.error{background:var(--red);}
+.toast.warn{background:#A05A12;}
+@keyframes toastIn{from{transform:translateY(-20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+@keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateY(-10px);}}
+
+/* ============ DESKTOP ============ */
+@media (min-width:1024px){
+  .app{
+    max-width:1200px;
+    background:transparent;
+    padding:1rem;
+    min-height:100vh;
+  }
+  #screen-game{
+    height:calc(100vh - 2rem);
+    border-radius:var(--r-xl);
+    overflow:hidden;
+    box-shadow:var(--shadow-md);
+    background:var(--lavender);
+  }
+  .top-bar{
+    padding:0.85rem 1.2rem;
+    gap:0.55rem;
+  }
+  .top-bar .level-tag{font-size:0.85rem;padding:0.42rem 0.85rem;}
+  .icon-btn{width:42px;height:42px;font-size:1.05rem;}
+  .clock-pill{font-size:0.95rem;padding:0.45rem 0.95rem;}
+  .brand-mini{font-size:1rem;}
+  .brand-mini .logo-mark{width:32px;height:32px;font-size:0.85rem;}
+  
+  .game-body{
+    display:grid;
+    grid-template-columns:1.05fr 1.5fr 0.95fr;
+    grid-template-rows:auto 1fr;
+    gap:1rem;
+    padding:1rem;
+  }
+  .banner{grid-column:1 / -1;}
+  .queue-section{
+    grid-column:1;grid-row:2;
+    overflow-y:auto;
+    max-height:none;
+  }
+  .floor-plan{grid-column:2;grid-row:2;}
+  .right-col{
+    grid-column:3;grid-row:2;
+    display:flex;flex-direction:column;gap:1rem;
+    overflow-y:auto;
+  }
+  
+  /* Desktop banner is bigger */
+  .banner{padding:1rem 1.2rem;}
+  .banner-title{font-size:0.72rem;}
+  .banner-body{font-size:0.95rem;}
+  .banner-body .tag{font-size:0.88rem;padding:0.12rem 0.65rem;}
+  
+  .queue-header h3,.floor-header h3{font-size:0.88rem;}
+  .patient-row{min-height:62px;padding:0.7rem 0.85rem 0.7rem 0.5rem;}
+  .patient-row .p-name{font-size:0.95rem;}
+  .patient-row .p-tag{font-size:0.78rem;}
+  .timer-pill{font-size:0.88rem;padding:0.4rem 0.7rem;}
+  
+  .room-label{font-size:0.78rem;}
+  .room-cap{font-size:0.66rem;}
+  .room-icon{width:30px;height:30px;font-size:0.95rem;}
+  .room.entrance{font-size:0.88rem;min-height:52px;}
+  
+  .bottom-bar{
+    border-radius:0;
+    padding:0.75rem 1.5rem;
+  }
+  .bottom-stat .bs-label{font-size:0.65rem;}
+  .bottom-stat .bs-value{font-size:1.15rem;}
+}
+
+@media (max-width:1023px){
+  /* Hide right column on tablet/mobile (staff and full metrics) */
+  .right-col{display:none;}
+}
+
+/* Narrow phones */
+@media (max-width:379px){
+  html,body{font-size:14px;}
+  .intro-title{font-size:1.75rem;}
+  .room-label{font-size:0.55rem;}
+  .room-icon{width:18px;height:18px;font-size:0.6rem;}
+  .room-cap{font-size:0.5rem;}
+  .patient-row{min-height:48px;padding:0.45rem 0.5rem 0.45rem 0.35rem;}
+  .patient-row .p-name{font-size:0.78rem;}
+  .patient-row .p-tag{font-size:0.65rem;}
+  .timer-pill{font-size:0.72rem;padding:0.25rem 0.45rem;min-width:36px;}
+  .top-bar{padding:0.45rem 0.6rem;}
+  .icon-btn{width:32px;height:32px;font-size:0.85rem;}
+  .brand-mini{font-size:0.7rem;}
+  .clock-pill{font-size:0.68rem;padding:0.25rem 0.55rem;}
+}
+
+/* Landscape phones */
+@media (max-height:500px) and (orientation:landscape){
+  .intro-hero{padding:1.25rem 1.5rem 3rem;}
+  .intro-title{font-size:1.5rem;}
+  .end-hero{padding:1.25rem 1.5rem 3rem;}
+  .grade-circle{width:90px;height:90px;font-size:3rem;}
+  .top-bar{padding:0.35rem 0.7rem;}
+  .game-body{padding:0.4rem 0.5rem 0.35rem;gap:0.35rem;}
+  .banner{padding:0.4rem 0.7rem;}
+  .queue-section{padding:0.4rem 0.55rem 0.5rem;}
+  .room-label{font-size:0.55rem;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============== USERNAME ============== -->
+  <section id="screen-username" class="screen active">
+    <div class="username-wrap">
+      <div class="username-brand"><span class="dot"></span> IHF Triage</div>
+      <h1 class="username-title">Join the Shift</h1>
+      <p class="username-sub">Choose a display name for the leaderboard. Other players will see this name next to your scores.</p>
+      <div class="username-card">
+        <label class="username-label" for="usernameInput">Your display name</label>
+        <input type="text" id="usernameInput" class="username-input" maxlength="30" autocomplete="off" placeholder="For example, Dr Chen">
+        <div class="username-hint">1 to 30 characters. Letters, numbers, spaces, and basic punctuation.</div>
+        <div class="username-error" id="usernameError"></div>
+        <div class="username-actions">
+          <button class="btn btn-primary" id="usernameContinue">Continue</button>
+        </div>
+      </div>
+      <button type="button" class="link-btn" id="facilitatorLink" style="margin-top:1rem;align-self:center;">View leaderboard as facilitator</button>
+    </div>
+  </section>
+
+  <!-- ============== FACILITATOR ============== -->
+  <section id="screen-facilitator" class="screen">
+    <div class="username-wrap" style="max-width:640px;">
+      <div class="username-brand"><span class="dot"></span> IHF Triage</div>
+      <h1 class="username-title">Facilitator View</h1>
+      <p class="username-sub">Live leaderboard for today's session. No score is submitted from this view.</p>
+      <div class="username-card">
+        <div class="leaderboard-title" style="margin-bottom:0.65rem;">
+          <span id="facLbTitle">Today's Leaderboard</span>
+          <span class="leaderboard-live">LIVE</span>
+        </div>
+        <div class="lb-toggle" role="tablist">
+          <button type="button" id="facTabLevel" class="active" role="tab">This Level</button>
+          <button type="button" id="facTabOverall" role="tab">Overall Run</button>
+        </div>
+        <div id="facLevelPickerWrap" style="margin-bottom:0.6rem;">
+          <label class="username-label" for="facLevelPicker" style="margin-bottom:0.35rem;">Level</label>
+          <select id="facLevelPicker" class="username-input" style="padding:0.6rem 0.75rem;">
+            <option value="1">Level 1: Basics</option>
+            <option value="2">Level 2: Ambiguity</option>
+            <option value="3">Level 3: Volume</option>
+            <option value="4">Level 4: Interference</option>
+            <option value="5">Level 5: Full Load</option>
+          </select>
+        </div>
+        <div class="lb-count" id="facLbCount" style="display:none;"></div>
+        <div class="lb-status" id="facLbStatus">Loading...</div>
+        <div class="leaderboard-list" id="facLeaderboardList" style="display:none;"></div>
+      </div>
+      <div class="username-actions" style="margin-top:1rem;">
+        <button type="button" class="btn btn-outline" id="facilitatorBack">Back to Start</button>
+      </div>
+    </div>
+  </section>
+  <section id="screen-intro" class="screen">
+    <div class="intro-hero">
+      <div class="intro-brand"><span class="dot"></span> IHF Triage</div>
+      <h1 class="intro-title">How to Play</h1>
+      <p class="intro-sub">Workload and Vigilance Simulator. Triage smart. Save lives. Beat the clock.</p>
+    </div>
+
+    <div class="intro-card">
+      <div class="intro-section">
+        <p style="font-size:0.95rem;color:var(--navy-deep);margin-bottom:1rem;">
+          <strong>You are the triage clinician.</strong> Drag each patient to the right room before their timer runs out.
+        </p>
+      </div>
+
+      <div class="intro-section">
+        <h3>Three Steps</h3>
+        <div class="step-row">
+          <div class="icon-badge">1</div>
+          <div class="step-text"><strong>Press and hold</strong> a patient in the queue.</div>
+        </div>
+        <div class="step-row">
+          <div class="icon-badge">2</div>
+          <div class="step-text"><strong>Drag</strong> to a glowing room that fits their priority.</div>
+        </div>
+        <div class="step-row">
+          <div class="icon-badge">3</div>
+          <div class="step-text"><strong>Release.</strong> Staff treat them. Repeat.</div>
+        </div>
+      </div>
+
+      <div class="intro-section">
+        <h3>Room Rules</h3>
+        <div class="rules-list">
+          <div class="rule-item"><span class="swatch" style="background:var(--red);"></span><span><strong>Immediate</strong> to Trauma Bay</span></div>
+          <div class="rule-item"><span class="swatch" style="background:var(--orange);"></span><span><strong>Urgent</strong> or Observation to Consult Room</span></div>
+          <div class="rule-item"><span class="swatch" style="background:var(--green);"></span><span><strong>Stable</strong> to Waiting Area</span></div>
+        </div>
+      </div>
+
+      <div class="intro-section">
+        <h3>Levels Get Harder</h3>
+        <p style="font-size:0.88rem;color:var(--navy-deep);line-height:1.5;">
+          Each level adds new pressure. Patients arrive faster, rooms move around the floor plan, room colours change, and cleaners block rooms between patients.
+        </p>
+      </div>
+
+      <div class="intro-section">
+        <h3>Win or Lose</h3>
+        <p style="font-size:0.88rem;color:var(--navy-deep);line-height:1.5;">
+          Hit the level's patient target with few critical misses. Expired timers cost points.
+        </p>
+      </div>
+
+      <div class="intro-actions">
+        <button class="btn btn-primary" id="startShift">Start Shift</button>
+        <button class="link-btn" id="goLevels">Choose Level</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== LEVEL SELECT ============== -->
+  <section id="screen-levels" class="screen">
+    <div class="levels-hero">
+      <button class="back-btn" data-screen="screen-intro">&#10094;</button>
+      <h2>Choose Level</h2>
+    </div>
+    <div class="levels-grid" id="levelsGrid"></div>
+  </section>
+
+  <!-- ============== GAME ============== -->
+  <section id="screen-game" class="screen">
+    <div class="top-bar">
+      <div class="brand-mini">
+        <div class="logo-mark">IHF</div>
+        <span>Triage</span>
+      </div>
+      <span class="level-tag" id="levelPill">Lvl 1</span>
+      <button class="icon-btn" id="pauseBtn" title="Pause">&#10074;&#10074;</button>
+      <button class="icon-btn" id="restartBtn" title="Restart">&#8635;</button>
+      <button class="icon-btn coral" id="helpBtn" title="Help">?</button>
+      <span class="clock-pill" id="clockPill">00:00</span>
+    </div>
+
+    <div class="game-body">
+      <!-- Banner -->
+      <div class="banner">
+        <div class="banner-row1">
+          <div class="banner-title">How to Triage</div>
+          <div class="banner-step" id="bannerStep"></div>
+        </div>
+        <div class="banner-body" id="bannerBody">
+          <span class="tag">Drag a patient</span> to a room on the floor plan.
+        </div>
+      </div>
+
+      <!-- Queue -->
+      <div class="queue-section">
+        <div class="queue-header">
+          <h3>Patient Queue</h3>
+          <span class="count-pill" id="queueCount">0 waiting</span>
+        </div>
+        <div class="queue-list" id="queueList">
+          <div class="queue-empty">No patients yet. Stand by.</div>
+        </div>
+      </div>
+
+      <!-- Floor Plan -->
+      <div class="floor-plan">
+        <div class="floor-header">
+          <h3>Floor Plan</h3>
+          <div class="staff-pips" id="staffPips" title="Staff status"></div>
+        </div>
+        <div class="floor-grid" id="floorGrid"></div>
+      </div>
+
+      <!-- Desktop only right column -->
+      <div class="right-col">
+        <div class="queue-section" style="padding:0.75rem;">
+          <div class="queue-header"><h3>Staff Roster</h3><span class="count-pill" id="staffCount">5 idle</span></div>
+          <div id="staffList" style="display:flex;flex-direction:column;gap:0.45rem;"></div>
+        </div>
+        <div class="queue-section" style="padding:0.75rem;">
+          <div class="queue-header"><h3>Performance</h3></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <div style="background:var(--lavender);border-radius:var(--r-md);padding:0.65rem;">
+              <div style="font-size:0.62rem;color:var(--grey);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Efficiency</div>
+              <div style="font-size:1.15rem;font-weight:800;color:var(--navy-deep);"><span id="mEfficiency">100</span>%</div>
+            </div>
+            <div style="background:var(--lavender);border-radius:var(--r-md);padding:0.65rem;">
+              <div style="font-size:0.62rem;color:var(--grey);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Avg Wait</div>
+              <div style="font-size:1.15rem;font-weight:800;color:var(--navy-deep);"><span id="mAvgWait">0</span>s</div>
+            </div>
+            <div style="background:var(--lavender);border-radius:var(--r-md);padding:0.65rem;">
+              <div style="font-size:0.62rem;color:var(--grey);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Processed</div>
+              <div style="font-size:1.15rem;font-weight:800;color:var(--navy-deep);" id="mProcessed">0</div>
+            </div>
+            <div style="background:var(--lavender);border-radius:var(--r-md);padding:0.65rem;">
+              <div style="font-size:0.62rem;color:var(--grey);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Crit Misses</div>
+              <div style="font-size:1.15rem;font-weight:800;color:var(--red);" id="mCritMiss">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar">
+      <div class="bottom-stat"><div class="bs-label">Score</div><div class="bs-value" id="bsScore">0</div></div>
+      <div class="bottom-stat"><div class="bs-label">Target</div><div class="bs-value" id="bsTarget">0/8</div></div>
+      <div class="bottom-stat"><div class="bs-label">Correct</div><div class="bs-value" id="bsCorrect">0</div></div>
+      <div class="bottom-stat"><div class="bs-label">Lost</div><div class="bs-value danger" id="bsLost">0</div></div>
+    </div>
+  </section>
+
+  <!-- ============== END OVERLAY ============== -->
+  <div class="overlay" id="endOverlay">
+    <div class="overlay-card">
+      <div class="end-hero">
+        <div class="small-label" id="endLevelLabel">Level Complete</div>
+        <h2>Shift Report</h2>
+      </div>
+      <div class="grade-wrap" style="margin-bottom:0;">
+        <div class="grade-circle" id="gradeCircle">A</div>
+        <div class="grade-message" id="gradeMessage">Excellent work, doctor.</div>
+        <div class="grade-sub" id="gradeSub">You kept the floor running clean.</div>
+        <div class="end-stats">
+          <div class="end-stat"><div class="es-label">Final Score</div><div class="es-value" id="endScore">0</div></div>
+          <div class="end-stat"><div class="es-label">Processed</div><div class="es-value" id="endProcessed">0</div></div>
+          <div class="end-stat"><div class="es-label">Correct</div><div class="es-value" id="endCorrect">0</div></div>
+          <div class="end-stat"><div class="es-label">Critical Misses</div><div class="es-value" id="endCritMiss">0</div></div>
+        </div>
+      </div>
+      <div class="leaderboard-block">
+        <div class="leaderboard-title">
+          <span id="lbTitleText">Today's Leaderboard</span>
+          <span class="leaderboard-live">LIVE</span>
+        </div>
+        <div class="lb-toggle" role="tablist">
+          <button type="button" id="lbTabLevel" class="active" role="tab">This Level</button>
+          <button type="button" id="lbTabOverall" role="tab">Overall Run</button>
+        </div>
+        <div class="lb-count" id="lbCount" style="display:none;"></div>
+        <div class="lb-status" id="lbStatus">Submitting your score...</div>
+        <div class="leaderboard-list" id="leaderboardList" style="display:none;"></div>
+      </div>
+      <div class="hist-block">
+        <div class="hist-title" id="histTitle">Historical Averages</div>
+        <div class="hist-status" id="histStatus">Loading historical data...</div>
+        <div id="histBody" style="display:none;">
+          <div class="hist-stats">
+            <div class="hist-stat"><div class="hs-label">Avg Score</div><div class="hs-value" id="histAvgScore">0</div></div>
+            <div class="hist-stat"><div class="hs-label">Avg Correct</div><div class="hs-value" id="histAvgCorrect">0</div></div>
+            <div class="hist-stat"><div class="hs-label">Shifts Recorded</div><div class="hs-value" id="histCount">0</div></div>
+          </div>
+          <div class="hist-compare" id="histCompare"></div>
+        </div>
+      </div>
+      <div class="end-actions">
+        <button class="btn btn-primary" id="advanceBtn">Advance to Next Level</button>
+        <button class="btn btn-outline" id="retryBtn">Replay Level</button>
+        <button class="link-btn" id="endLevelsBtn">Choose a Different Level</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== HELP OVERLAY ============== -->
+  <div class="overlay" id="helpOverlay">
+    <div class="overlay-card">
+      <div class="intro-hero" style="position:relative;">
+        <button class="close-x" id="helpClose">&times;</button>
+        <div class="intro-brand"><span class="dot"></span> Quick Help</div>
+        <h1 class="intro-title">How to Play</h1>
+        <p class="intro-sub">Game is paused while help is open.</p>
+      </div>
+      <div class="intro-card" style="margin-bottom:1.5rem;">
+        <div class="intro-section">
+          <h3>Three Steps</h3>
+          <div class="step-row"><div class="icon-badge">1</div><div class="step-text"><strong>Press and hold</strong> a patient.</div></div>
+          <div class="step-row"><div class="icon-badge">2</div><div class="step-text"><strong>Drag</strong> to a glowing room.</div></div>
+          <div class="step-row"><div class="icon-badge">3</div><div class="step-text"><strong>Release.</strong> Staff handle it.</div></div>
+        </div>
+        <div class="intro-section">
+          <h3>Room Rules</h3>
+          <div class="rules-list">
+            <div class="rule-item"><span class="swatch" style="background:var(--red);"></span><span><strong>Immediate</strong> to Trauma Bay</span></div>
+            <div class="rule-item"><span class="swatch" style="background:var(--orange);"></span><span><strong>Urgent</strong> or Observation to Consult Room</span></div>
+            <div class="rule-item"><span class="swatch" style="background:var(--green);"></span><span><strong>Stable</strong> to Waiting Area</span></div>
+          </div>
+        </div>
+        <div class="intro-section">
+          <h3>Watch For</h3>
+          <p style="font-size:0.88rem;color:var(--navy-deep);line-height:1.5;">
+            From Level 2 onward, some patients understate how sick they really are. The drag card reveals vitals and symptoms. Read them before you drop.
+          </p>
+        </div>
+        <button class="btn btn-primary" id="helpResume" style="margin-top:1rem;">Resume Shift</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+</div>
+
+<script type="module">
+/* =============== FIREBASE =============== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, query, where, orderBy, limit, onSnapshot, getDocs, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCp3065ccE2HJAq6IdIHrxaZT3o3G19wUw",
+  authDomain: "ihf-triage.firebaseapp.com",
+  projectId: "ihf-triage",
+  storageBucket: "ihf-triage.firebasestorage.app",
+  messagingSenderId: "345726082623",
+  appId: "1:345726082623:web:eb5d4e6505df6c7907628a",
+  measurementId: "G-R8YTKG6DEK"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+// Expose for the classic script below
+window.FB = { db, collection, addDoc, query, where, orderBy, limit, onSnapshot, getDocs, serverTimestamp };
+</script>
+
+<script>
+/* =============== STATE =============== */
+const State = {
+  screen:'screen-username',
+  username:'',
+  level:1,
+  levelCfg:null,
+  patients:[],
+  staff:[],
+  rooms:[],
+  score:0,
+  correct:0,
+  wrong:0,
+  deteriorated:0,
+  processed:0,
+  critMiss:0,
+  totalWait:0,
+  paused:false,
+  shiftTime:0,
+  lastSpawn:0,
+  nextPatientId:1,
+  gameOver:false,
+  diagnosticCooldown:0,
+  dragging:false,
+  dragPatientId:null
+};
+
+/* =============== LEVELS =============== */
+const LEVELS = {
+  1:{name:'Basics',desc:'Low volume. Long timers. Claimed urgency matches reality.',
+     target:8,spawnEvery:14,timerMin:70,timerMax:95,
+     ambiguity:0,hidden:false,ambulance:false,ambulanceRate:0,
+     cleaning:0,fatigue:false,breaks:false,hideVitals:false,
+     distribution:{red:0.10,orange:0.25,yellow:0.30,green:0.35}},
+  2:{name:'Ambiguity',desc:'Around 30% of patients understate their condition. Read vitals carefully.',
+     target:10,spawnEvery:11,timerMin:60,timerMax:85,
+     ambiguity:0.30,hidden:true,ambulance:false,ambulanceRate:0,
+     cleaning:5,fatigue:false,breaks:false,hideVitals:false,
+     distribution:{red:0.15,orange:0.30,yellow:0.30,green:0.25}},
+  3:{name:'Multitasking',desc:'Faster arrivals. Staff take breaks. Ambulances skip the queue.',
+     target:14,spawnEvery:6,timerMin:40,timerMax:60,
+     ambiguity:0.35,hidden:true,ambulance:true,ambulanceRate:0.22,
+     cleaning:8,fatigue:false,breaks:true,hideVitals:false,
+     distribution:{red:0.20,orange:0.35,yellow:0.25,green:0.20},highlightDropZones:false},
+  4:{name:'System Overload',desc:'Rooms need cleaning between patients. Staff fatigue slows you down.',
+     target:18,spawnEvery:4.5,timerMin:30,timerMax:50,
+     ambiguity:0.45,hidden:true,ambulance:true,ambulanceRate:0.28,
+     cleaning:6,fatigue:true,breaks:true,hideVitals:false,
+     distribution:{red:0.27,orange:0.33,yellow:0.22,green:0.18},
+     floorLayout:[{kind:'entrance'},{kind:'room',id:'c1'},{kind:'room',id:'c2'},{kind:'room',id:'c3'},{kind:'room',id:'wa'},{kind:'room',id:'tb1'},{kind:'room',id:'tb2'},{kind:'room',id:'tb3'},{kind:'desk'}],
+     colorOverrides:{tb1:'consult',tb2:'consult',tb3:'consult',c1:'trauma',c2:'trauma',c3:'trauma'},highlightDropZones:false},
+  5:{name:'Mass Casualty',desc:'Vitals hidden until you tap the lens icon. All systems active.',
+     target:22,spawnEvery:3.5,timerMin:25,timerMax:40,
+     ambiguity:0.55,hidden:true,ambulance:true,ambulanceRate:0.38,
+     cleaning:6,fatigue:true,breaks:true,hideVitals:true,
+     distribution:{red:0.32,orange:0.33,yellow:0.20,green:0.15},
+     floorLayout:[{kind:'entrance'},{kind:'room',id:'c2'},{kind:'room',id:'tb3'},{kind:'room',id:'c1'},{kind:'room',id:'wa'},{kind:'room',id:'tb1'},{kind:'room',id:'c3'},{kind:'room',id:'tb2'},{kind:'desk'}],
+     colorOverrides:{tb1:'waiting',tb2:'consult',tb3:'trauma',c1:'trauma',c2:'consult',c3:'waiting'},highlightDropZones:false}
+};
+
+const ROOM_DEFS = [
+  {id:'tb1',label:'Trauma 01',type:'trauma',capacity:1,icon:'T'},
+  {id:'tb2',label:'Trauma 02',type:'trauma',capacity:1,icon:'T'},
+  {id:'tb3',label:'Trauma 03',type:'trauma',capacity:1,icon:'T'},
+  {id:'wa',label:'Waiting',type:'waiting',capacity:6,icon:'W'},
+  {id:'c1',label:'Consult 01',type:'consult',capacity:2,icon:'C'},
+  {id:'c2',label:'Consult 02',type:'consult',capacity:2,icon:'C'},
+  {id:'c3',label:'Consult 03',type:'consult',capacity:2,icon:'C'}
+];
+
+const STAFF_DEFS = [
+  {id:'s1',name:'Dr. Hills',role:'Doctor',initials:'AH'},
+  {id:'s2',name:'Dr. Patel',role:'Doctor',initials:'RP'},
+  {id:'s3',name:'N. Okafor',role:'Nurse',initials:'NO'},
+  {id:'s4',name:'N. Tanaka',role:'Nurse',initials:'NT'},
+  {id:'s5',name:'N. Reyes',role:'Nurse',initials:'NR'}
+];
+
+const NAMES = ['James Carter','Sarah Lin','Mohammed Ali','Priya Shah','Diego Romero',
+  'Emma Walsh','Ben Cohen','Yuki Tanaka','Anna Petrov','Liam OBrien',
+  'Maya Singh','Tomas Vega','Lara Greco','Noah Kim','Zara Hassan',
+  'Felix Brun','Aoife Ryan','Sven Larsson','Nina Costa','Adam West'];
+
+const SYMPTOM_BANK = {
+  red:[{text:'Severe crushing chest pain',hidden:false},
+       {text:'Loss of consciousness',hidden:false},
+       {text:'Heavy uncontrolled bleeding',hidden:false},
+       {text:'Stopped breathing on arrival',hidden:false},
+       {text:'Severe head trauma',hidden:false},
+       {text:'Cardiac arrest in transit',hidden:false},
+       {text:'Anaphylactic shock',hidden:false}],
+  orange:[{text:'Severe abdominal pain 8 of 10',hidden:false},
+          {text:'Open fracture, distal limb',hidden:false},
+          {text:'Difficulty breathing, wheeze',hidden:false},
+          {text:'High fever, confused',hidden:false},
+          {text:'Sudden one-sided weakness',hidden:false},
+          {text:'Severe migraine with vomiting',hidden:false}],
+  yellow:[{text:'Twisted ankle, swelling',hidden:false},
+          {text:'Persistent vomiting 24 hours',hidden:false},
+          {text:'Moderate back pain',hidden:false},
+          {text:'Cut on forearm, controlled',hidden:false},
+          {text:'Mild dehydration',hidden:false},
+          {text:'Earache with fever',hidden:false}],
+  green:[{text:'Mild cold symptoms',hidden:false},
+         {text:'Prescription refill',hidden:false},
+         {text:'Sore throat, no fever',hidden:false},
+         {text:'Small skin rash',hidden:false},
+         {text:'Minor scrape on knee',hidden:false},
+         {text:'Stitches removal',hidden:false}]
+};
+const HIDDEN_HINTS = {
+  red:[{text:'Pale, clammy, weak pulse on exam',hidden:true},
+       {text:'Pain radiating to left arm and jaw',hidden:true},
+       {text:'Brief loss of consciousness en route',hidden:true}],
+  orange:[{text:'Pain woke them from sleep',hidden:true},
+          {text:'Notable change in mental status',hidden:true},
+          {text:'Family history of cardiac events',hidden:true}]
+};
+
+function vitalsFor(urgency){
+  const v={hr:80,bp:'120/80',spo2:98};
+  if(urgency==='red'){v.hr=randInt(130,160);v.bp=randInt(70,90)+'/'+randInt(40,55);v.spo2=randInt(78,89);}
+  else if(urgency==='orange'){v.hr=randInt(105,128);v.bp=randInt(95,115)+'/'+randInt(55,70);v.spo2=randInt(90,94);}
+  else if(urgency==='yellow'){v.hr=randInt(88,102);v.bp=randInt(115,135)+'/'+randInt(70,85);v.spo2=randInt(95,97);}
+  else{v.hr=randInt(65,85);v.bp=randInt(115,130)+'/'+randInt(72,82);v.spo2=randInt(97,99);}
+  return v;
+}
+function isAbnormal(k,val){
+  if(k==='hr')return val>110||val<60;
+  if(k==='spo2')return val<94;
+  if(k==='bp'){const sys=parseInt(val.split('/')[0]);return sys<100||sys>160;}
+  return false;
+}
+
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function $(id){return document.getElementById(id);}
+
+function weightedSeverity(d){
+  const r=Math.random();let acc=0;
+  for(const k of ['red','orange','yellow','green']){acc+=d[k];if(r<=acc)return k;}
+  return 'green';
+}
+
+const URGENCY_RANK={red:4,orange:3,yellow:2,green:1};
+const URGENCY_LABEL={red:'Immediate',orange:'Urgent',yellow:'Observation',green:'Stable'};
+const URGENCY_COLOR={red:'#E5535B',orange:'#F2A14F',yellow:'#E5C04A',green:'#5B9D7F'};
+
+function makePatient(opts={}){
+  const cfg=State.levelCfg;
+  const actual=opts.forceUrgency||weightedSeverity(cfg.distribution);
+  let claimed=actual;
+  if(!opts.forceUrgency&&Math.random()<cfg.ambiguity){
+    const dn={red:['orange','yellow'],orange:['yellow','green'],yellow:['green'],green:[]};
+    if(dn[actual].length)claimed=pick(dn[actual]);
+  }
+  const baseSym=pick(SYMPTOM_BANK[claimed]);
+  const symptoms=[baseSym];
+  if(cfg.hidden&&URGENCY_RANK[actual]>URGENCY_RANK[claimed]){
+    const h=HIDDEN_HINTS[actual]?pick(HIDDEN_HINTS[actual]):null;
+    if(h)symptoms.push(h);
+  }
+  if(Math.random()<0.4){
+    const ex=pick(SYMPTOM_BANK[actual].filter(s=>s.text!==baseSym.text));
+    if(ex)symptoms.push(ex);
+  }
+  const timer=randInt(cfg.timerMin,cfg.timerMax);
+  return {
+    id:State.nextPatientId++,
+    name:opts.name||pick(NAMES),
+    age:randInt(18,82),
+    sex:pick(['M','F']),
+    claimed,actual,
+    timer:timer*1000,maxTimer:timer*1000,
+    vitals:vitalsFor(actual),
+    symptoms,
+    status:'queued',room:null,
+    progress:0,processTime:0,
+    assignedStaff:null,
+    arrivedAt:State.shiftTime,
+    isAmbulance:!!opts.ambulance,
+    vitalsRevealed:!cfg.hideVitals
+  };
+}
+
+function initRooms(){
+  State.rooms=ROOM_DEFS.map(r=>({...r,occupants:[],cleaningUntil:0}));
+}
+function initStaff(){
+  State.staff=STAFF_DEFS.map(s=>({...s,status:'idle',patientId:null,
+    fatigue:0,nextBreak:State.levelCfg.breaks?randInt(40,80)*1000:Infinity,breakEnd:0}));
+}
+
+/* =============== CLOCK =============== */
+let tickHandle=null;
+const TICK=100;
+function startClock(){if(tickHandle)clearInterval(tickHandle);tickHandle=setInterval(tick,TICK);}
+function stopClock(){if(tickHandle){clearInterval(tickHandle);tickHandle=null;}}
+
+function tick(){
+  if(State.paused||State.gameOver)return;
+  State.shiftTime+=TICK;
+  if(State.diagnosticCooldown>0)State.diagnosticCooldown-=TICK;
+
+  const cfg=State.levelCfg;
+  if(State.shiftTime-State.lastSpawn>=cfg.spawnEvery*1000){
+    const totalActive=State.processed+State.patients.filter(p=>p.status!=='done').length;
+    if(totalActive<cfg.target+5){
+      spawnPatient();
+      State.lastSpawn=State.shiftTime;
+    }
+  }
+
+  for(const p of State.patients){
+    if(p.status==='queued'){
+      p.timer-=TICK;
+      if(p.timer<=0){p.timer=0;deterioratePatient(p);}
+    }
+  }
+  for(const r of State.rooms){
+    if(r.cleaningUntil&&State.shiftTime>=r.cleaningUntil)r.cleaningUntil=0;
+  }
+  for(const s of State.staff){
+    if(s.status==='break'){
+      if(State.shiftTime>=s.breakEnd){
+        s.status=s.fatigue>60?'fatigued':'idle';
+        s.nextBreak=State.shiftTime+randInt(60,100)*1000;
+      }
+    }else if(s.status==='idle'||s.status==='fatigued'){
+      if(cfg.breaks&&State.shiftTime>=s.nextBreak){
+        if(State.patients.filter(p=>p.status==='queued').length<4){
+          s.status='break';
+          s.breakEnd=State.shiftTime+randInt(8,14)*1000;
+          s.fatigue=Math.max(0,s.fatigue-50);
+        }else{s.nextBreak=State.shiftTime+10000;}
+      }
+    }
+  }
+  assignStaff();
+  for(const p of State.patients){
+    if(p.status==='processing'){
+      let speed=TICK;
+      const staff=State.staff.find(s=>s.id===p.assignedStaff);
+      if(staff&&staff.status==='fatigued')speed=TICK*0.7;
+      p.progress+=speed;
+      if(p.progress>=p.processTime)completePatient(p);
+    }
+  }
+  if(State.processed>=State.levelCfg.target){endShift();return;}
+  if(State.critMiss>=4){endShift();return;}
+  render();
+}
+
+function spawnPatient(){
+  const ambulance=State.levelCfg.ambulance&&Math.random()<State.levelCfg.ambulanceRate;
+  const p=makePatient({forceUrgency:ambulance?'red':null,ambulance});
+  State.patients.push(p);
+  if(ambulance)toast('Ambulance arrival! Trauma incoming.','warn');
+}
+
+function tryAssignRoom(roomId,patientId){
+  const p=State.patients.find(x=>x.id===patientId);
+  if(!p||p.status!=='queued')return;
+  const room=State.rooms.find(r=>r.id===roomId);
+  if(!room)return;
+  if(room.cleaningUntil&&State.shiftTime<room.cleaningUntil){
+    flashRoom(room.id);toast('Room is being cleaned','error');return;
+  }
+  if(room.occupants.length>=room.capacity){
+    flashRoom(room.id);toast('Room is at capacity','error');return;
+  }
+  const a=p.actual;
+  let valid=false;
+  if(a==='red'&&room.type==='trauma')valid=true;
+  else if((a==='orange'||a==='yellow')&&room.type==='consult')valid=true;
+  else if(a==='green'&&(room.type==='waiting'||room.type==='consult'))valid=true;
+  if(!valid){
+    flashRoom(room.id);
+    State.score=Math.max(0,State.score-30);
+    State.wrong+=1;
+    const corr=a==='red'?'Trauma Bay':(a==='orange'||a==='yellow')?'Consult Room':'Waiting Area';
+    toast('Wrong room. Should be '+corr+'.','error');
+    render();return;
+  }
+  p.status='inRoom';p.room=room.id;
+  room.occupants.push(p.id);
+  const speedRatio=p.timer/p.maxTimer;
+  const base={red:200,orange:150,yellow:100,green:60}[a];
+  const bonus=Math.round(base*0.5*speedRatio);
+  State.score+=base+bonus;
+  State.correct+=1;
+  State.totalWait+=(p.maxTimer-p.timer);
+  toast('Correct! +'+(base+bonus)+' pts','success');
+  render();
+}
+
+function assignStaff(){
+  const idle=State.staff.filter(s=>s.status==='idle'||s.status==='fatigued');
+  if(idle.length===0)return;
+  const waiting=State.patients
+    .filter(p=>p.status==='inRoom'&&!p.assignedStaff)
+    .sort((a,b)=>URGENCY_RANK[b.actual]-URGENCY_RANK[a.actual]);
+  for(const p of waiting){
+    const s=idle.shift();
+    if(!s)break;
+    s.status=s.fatigue>60?'fatigued':'working';
+    s.patientId=p.id;
+    p.assignedStaff=s.id;
+    p.status='processing';
+    p.processTime={red:14000,orange:11000,yellow:8000,green:6000}[p.actual];
+    p.progress=0;
+  }
+}
+
+function completePatient(p){
+  const room=State.rooms.find(r=>r.id===p.room);
+  if(room){
+    room.occupants=room.occupants.filter(id=>id!==p.id);
+    if(State.levelCfg.cleaning)room.cleaningUntil=State.shiftTime+State.levelCfg.cleaning*1000;
+  }
+  const staff=State.staff.find(s=>s.id===p.assignedStaff);
+  if(staff){
+    staff.patientId=null;
+    if(State.levelCfg.fatigue){
+      staff.fatigue+={red:25,orange:18,yellow:12,green:8}[p.actual];
+      staff.status=staff.fatigue>60?'fatigued':'idle';
+    }else staff.status='idle';
+  }
+  p.status='done';
+  State.processed+=1;
+  State.patients=State.patients.filter(x=>x.id!==p.id);
+}
+
+function deterioratePatient(p){
+  const penalty={red:240,orange:180,yellow:130,green:100}[p.actual];
+  State.score=Math.max(0,State.score-penalty);
+  State.deteriorated+=1;
+  if(p.actual==='red'||p.actual==='orange')State.critMiss+=1;
+  toast(p.name+' deteriorated ('+URGENCY_LABEL[p.actual]+'). -'+penalty,'error');
+  State.patients=State.patients.filter(x=>x.id!==p.id);
+}
+
+/* =============== RENDER =============== */
+const MAX_VISIBLE_QUEUE=4;
+
+function render(){
+  renderTopBar();
+  if(!State.dragging) renderQueue(); else updateTimersInPlace();
+  renderBanner();
+  if(!State.dragging) renderFloor(); else updateRoomCapsInPlace();
+  renderStaffPips();
+  renderStaffList();
+  renderMetrics();
+  renderBottom();
+}
+
+function renderTopBar(){
+  $('levelPill').textContent='Lvl '+State.level;
+  const mm=Math.floor(State.shiftTime/60000).toString().padStart(2,'0');
+  const ss=Math.floor((State.shiftTime%60000)/1000).toString().padStart(2,'0');
+  $('clockPill').textContent=mm+':'+ss;
+  $('pauseBtn').innerHTML=State.paused?'&#9658;':'&#10074;&#10074;';
+}
+
+function renderQueue(){
+  const list=$('queueList');
+  const queued=State.patients.filter(p=>p.status==='queued');
+  $('queueCount').textContent=queued.length+' waiting';
+
+  if(queued.length===0){
+    list.innerHTML='<div class="queue-empty">No patients in queue.</div>';
+    return;
+  }
+
+  const visible=queued.slice(0,MAX_VISIBLE_QUEUE);
+  const hidden=queued.length-visible.length;
+  const showDiag=State.levelCfg.hideVitals;
+
+  let html=visible.map(p=>{
+    const sec=Math.max(0,Math.ceil(p.timer/1000));
+    let tCls='timer-pill';
+    if(sec<=10)tCls+=' danger';
+    else if(sec<=20)tCls+=' warn';
+    const claimed=URGENCY_LABEL[p.claimed];
+    const ambBadge=p.isAmbulance?'<span class="amb-badge">AMB</span>':'';
+    const sym=p.symptoms[0]?p.symptoms[0].text:'';
+    const diagBtn=(showDiag&&!p.vitalsRevealed)?
+      '<button class="diag-mini'+(State.diagnosticCooldown>0?' busy':'')+'" data-diag="'+p.id+'" title="Diagnostic check">&#128270;</button>':'';
+    return '<div class="patient-row" data-pid="'+p.id+'">'
+      +'<span class="urgency-strip" style="background:'+URGENCY_COLOR[p.claimed]+';"></span>'
+      +'<div class="p-info">'
+        +'<div class="p-name">'+p.name+ambBadge+'</div>'
+        +'<div class="p-tag">'+p.age+'y '+p.sex+' &middot; '+claimed+' &middot; '+sym+'</div>'
+      +'</div>'
+      +diagBtn
+      +'<div class="'+tCls+'" data-timer="'+p.id+'">'+sec+'s</div>'
+    +'</div>';
+  }).join('');
+
+  if(hidden>0){
+    html+='<div class="queue-overflow">+'+hidden+' more in queue</div>';
+  }
+
+  list.innerHTML=html;
+
+  // Wire drag for each patient row
+  list.querySelectorAll('[data-pid]').forEach(el=>{
+    const pid=parseInt(el.dataset.pid);
+    el.addEventListener('pointerdown',e=>onDragStart(e,pid));
+  });
+
+  // Wire diagnostic buttons (block drag propagation)
+  list.querySelectorAll('[data-diag]').forEach(el=>{
+    el.addEventListener('pointerdown',e=>{e.stopPropagation();});
+    el.addEventListener('click',e=>{
+      e.stopPropagation();
+      runDiagnostic(parseInt(el.dataset.diag));
+    });
+  });
+}
+
+function updateTimersInPlace(){
+  // Lightweight update during drag (don't rebuild DOM)
+  document.querySelectorAll('[data-timer]').forEach(el=>{
+    const pid=parseInt(el.dataset.timer);
+    const p=State.patients.find(x=>x.id===pid);
+    if(!p)return;
+    const sec=Math.max(0,Math.ceil(p.timer/1000));
+    el.textContent=sec+'s';
+    el.className='timer-pill'+(sec<=10?' danger':sec<=20?' warn':'')+'';
+    el.setAttribute('data-timer',pid);
+  });
+}
+
+function updateRoomCapsInPlace(){
+  // Update room occupancy dots during drag
+  for(const r of State.rooms){
+    const el=document.querySelector('[data-rid="'+r.id+'"]');
+    if(!el)continue;
+    const dotsEl=el.querySelector('.occupants');
+    if(dotsEl) dotsEl.innerHTML = r.occupants.map(()=>'<span class="occupant-dot"></span>').join('');
+  }
+}
+
+function renderBanner(){
+  $('bannerStep').textContent='';
+  $('bannerBody').innerHTML='<span class="tag">Drag a patient</span> to a room on the floor plan.';
+}
+
+function renderFloor(){
+  const grid=$('floorGrid');
+  const defaultLayout=[
+    {kind:'entrance'},
+    {kind:'room',id:'tb1'},{kind:'room',id:'tb2'},{kind:'room',id:'tb3'},{kind:'room',id:'wa'},
+    {kind:'room',id:'c1'},{kind:'room',id:'c2'},{kind:'room',id:'c3'},{kind:'desk'}
+  ];
+  const layout=State.levelCfg.floorLayout||defaultLayout;
+  const colorOverrides=State.levelCfg.colorOverrides||{};
+  grid.innerHTML=layout.map(cell=>{
+    if(cell.kind==='entrance'){
+      return '<div class="room entrance"><div class="room-icon">A</div><div>Ambulance Entrance</div></div>';
+    }
+    if(cell.kind==='desk'){
+      return '<div class="room decorative"><div class="room-icon">D</div><div class="room-label">Triage Desk</div></div>';
+    }
+    const r=State.rooms.find(rr=>rr.id===cell.id);
+    if(!r)return'';
+    let cls='room '+(colorOverrides[r.id]||r.type);
+    if(r.cleaningUntil&&State.shiftTime<r.cleaningUntil)cls+=' cleaning';
+    const dots=r.occupants.map(()=>'<span class="occupant-dot"></span>').join('');
+    return '<div class="'+cls+'" data-rid="'+r.id+'">'
+      +'<div class="room-icon">'+r.icon+'</div>'
+      +'<div class="room-label">'+r.label+'</div>'
+      +'<div class="room-cap">'+r.occupants.length+'/'+r.capacity+'</div>'
+      +'<div class="occupants">'+dots+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function flashRoom(id){
+  const el=document.querySelector('[data-rid="'+id+'"]');
+  if(el){el.classList.add('rejected');setTimeout(()=>el.classList.remove('rejected'),500);}
+}
+
+function renderStaffPips(){
+  const el=$('staffPips');
+  if(!el)return;
+  el.innerHTML=State.staff.map(s=>'<span class="staff-pip '+s.status+'" title="'+s.name+' ('+s.status+')"></span>').join('');
+}
+
+function renderStaffList(){
+  const list=$('staffList');
+  if(!list)return;
+  const idle=State.staff.filter(s=>s.status==='idle').length;
+  const sc=$('staffCount');if(sc)sc.textContent=idle+' idle';
+  list.innerHTML=State.staff.map(s=>{
+    const statusColors={idle:'var(--green)',working:'var(--orange)',break:'var(--purple)',fatigued:'var(--red)'};
+    return '<div style="display:flex;align-items:center;gap:0.55rem;padding:0.45rem 0.55rem;background:var(--lavender);border-radius:var(--r-md);">'
+      +'<div style="width:30px;height:30px;border-radius:50%;background:var(--purple);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.7rem;flex-shrink:0;">'+s.initials+'</div>'
+      +'<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:0.8rem;color:var(--navy-deep);">'+s.name+'</div><div style="font-size:0.66rem;color:var(--grey);">'+s.role+'</div></div>'
+      +'<span style="font-size:0.62rem;font-weight:700;color:'+statusColors[s.status]+';text-transform:uppercase;letter-spacing:0.04em;">'+s.status+'</span>'
+    +'</div>';
+  }).join('');
+}
+
+function renderMetrics(){
+  const mE=$('mEfficiency'),mA=$('mAvgWait'),mP=$('mProcessed'),mC=$('mCritMiss');
+  const totalAttempts=State.correct+State.wrong+State.deteriorated;
+  const eff=totalAttempts===0?100:Math.round((State.correct/totalAttempts)*100);
+  const avgWait=State.correct===0?0:Math.round((State.totalWait/State.correct)/1000);
+  if(mE)mE.textContent=eff;
+  if(mA)mA.textContent=avgWait;
+  if(mP)mP.textContent=State.processed+' / '+State.levelCfg.target;
+  if(mC)mC.textContent=State.critMiss;
+}
+
+function renderBottom(){
+  $('bsScore').textContent=Math.max(0,State.score);
+  $('bsTarget').textContent=State.processed+'/'+State.levelCfg.target;
+  $('bsCorrect').textContent=State.correct;
+  $('bsLost').textContent=State.deteriorated;
+}
+
+/* =============== DRAG AND DROP =============== */
+let dragState=null;
+
+function onDragStart(e,patientId){
+  if(dragState) return;
+  if(State.paused||State.gameOver) return;
+  const p=State.patients.find(x=>x.id===patientId);
+  if(!p||p.status!=='queued') return;
+  if(e.target.closest('.diag-mini')) return;
+
+  e.preventDefault();
+  const card=e.currentTarget;
+
+  dragState={
+    patient:p,
+    pointerId:e.pointerId,
+    cardEl:card,
+    startX:e.clientX,
+    startY:e.clientY,
+    activated:false,
+    ghost:null,
+    currentDropEl:null
+  };
+
+  try{card.setPointerCapture(e.pointerId);}catch(err){}
+  card.addEventListener('pointermove',onDragMove);
+  card.addEventListener('pointerup',onDragEnd);
+  card.addEventListener('pointercancel',onDragCancel);
+
+  // Freeze queue rebuilds the moment a finger lands on a patient.
+  // Without this, the 100ms tick re-renders the queue HTML and the
+  // touched element gets removed before the user can even move.
+  State.dragging=true;
+}
+
+function onDragMove(e){
+  if(!dragState||e.pointerId!==dragState.pointerId) return;
+
+  if(!dragState.activated){
+    const dx=e.clientX-dragState.startX;
+    const dy=e.clientY-dragState.startY;
+    if(Math.sqrt(dx*dx+dy*dy)<5) return;
+    activateDrag();
+  }
+
+  positionGhost(e.clientX,e.clientY);
+  updateDropTarget(e.clientX,e.clientY);
+}
+
+function activateDrag(){
+  dragState.activated=true;
+  State.dragging=true;
+  State.dragPatientId=dragState.patient.id;
+  dragState.cardEl.classList.add('dragging');
+  createGhost();
+  markRooms();
+  renderBanner();
+}
+
+function createGhost(){
+  const p=dragState.patient;
+  const hr=p.vitalsRevealed?p.vitals.hr+' bpm':'???';
+  const bp=p.vitalsRevealed?p.vitals.bp:'???';
+  const sp=p.vitalsRevealed?p.vitals.spo2+'%':'???';
+  const hrAb=p.vitalsRevealed&&isAbnormal('hr',p.vitals.hr);
+  const bpAb=p.vitalsRevealed&&isAbnormal('bp',p.vitals.bp);
+  const spAb=p.vitalsRevealed&&isAbnormal('spo2',p.vitals.spo2);
+  const hideAll=!p.vitalsRevealed;
+  const sym=p.symptoms.map(s=>'<div class="ghost-sym'+(s.hidden?' hidden':'')+'">'+s.text+'</div>').join('');
+  const ambBadge=p.isAmbulance?'<span class="amb-badge">AMB</span>':'';
+
+  const g=document.createElement('div');
+  g.className='drag-ghost';
+  g.innerHTML=
+    '<div class="ghost-strip" style="background:'+URGENCY_COLOR[p.claimed]+';"></div>'
+    +'<div class="ghost-body">'
+      +'<div class="ghost-name">'+p.name+ambBadge+'</div>'
+      +'<div class="ghost-meta">'+p.age+'y '+p.sex+' &middot; Claims '+URGENCY_LABEL[p.claimed]+'</div>'
+      +'<div class="ghost-vitals">'
+        +'<div class="ghost-vital'+(hrAb?' ab':'')+(hideAll?' hide':'')+'"><span>HR</span><strong>'+hr+'</strong></div>'
+        +'<div class="ghost-vital'+(bpAb?' ab':'')+(hideAll?' hide':'')+'"><span>BP</span><strong>'+bp+'</strong></div>'
+        +'<div class="ghost-vital'+(spAb?' ab':'')+(hideAll?' hide':'')+'"><span>SpO2</span><strong>'+sp+'</strong></div>'
+      +'</div>'
+      +'<div class="ghost-symptoms">'+sym+'</div>'
+    +'</div>';
+  document.body.appendChild(g);
+  dragState.ghost=g;
+}
+
+function positionGhost(x,y){
+  if(!dragState.ghost)return;
+  // Position above and centered on pointer; clamp so ghost stays on screen
+  const g=dragState.ghost;
+  const rect=g.getBoundingClientRect();
+  const w=rect.width||260;
+  const h=rect.height||180;
+  let left=x;
+  let top=y;
+  // ghost is translated by (-50%, -115%) so left/top are anchor pointers
+  // Clamp to viewport
+  const minLeft=w/2+4;
+  const maxLeft=window.innerWidth-w/2-4;
+  if(left<minLeft)left=minLeft;
+  if(left>maxLeft)left=maxLeft;
+  const minTop=h+10;
+  if(top<minTop)top=minTop;
+  g.style.left=left+'px';
+  g.style.top=top+'px';
+}
+
+function updateDropTarget(x,y){
+  const g=dragState.ghost;
+  if(g)g.style.display='none';
+  const el=document.elementFromPoint(x,y);
+  if(g)g.style.display='';
+
+  const roomEl=el?el.closest('[data-rid]'):null;
+
+  document.querySelectorAll('.room.drop-hover').forEach(r=>r.classList.remove('drop-hover'));
+  if(roomEl){
+    roomEl.classList.add('drop-hover');
+    dragState.currentDropEl=roomEl;
+  }else{
+    dragState.currentDropEl=null;
+  }
+}
+
+function markRooms(){
+  const showHints=State.levelCfg.highlightDropZones!==false;
+  const p=dragState.patient;
+  for(const r of State.rooms){
+    const el=document.querySelector('[data-rid="'+r.id+'"]');
+    if(!el)continue;
+    el.classList.remove('drop-valid','drop-invalid','drop-hover');
+    if(!showHints)continue;
+    if(r.cleaningUntil&&State.shiftTime<r.cleaningUntil){el.classList.add('drop-invalid');continue;}
+    if(r.occupants.length>=r.capacity){el.classList.add('drop-invalid');continue;}
+    const a=p.actual;
+    let valid=false;
+    if(a==='red'&&r.type==='trauma')valid=true;
+    else if((a==='orange'||a==='yellow')&&r.type==='consult')valid=true;
+    else if(a==='green'&&(r.type==='waiting'||r.type==='consult'))valid=true;
+    el.classList.add(valid?'drop-valid':'drop-invalid');
+  }
+}
+
+function onDragEnd(e){
+  if(!dragState||e.pointerId!==dragState.pointerId)return;
+  if(dragState.activated){
+    const drop=dragState.currentDropEl;
+    if(drop){
+      tryAssignRoom(drop.dataset.rid,dragState.patient.id);
+    }
+    cleanupDrag();
+  } else {
+    // Tap-without-drag: still need to unfreeze the queue
+    State.dragging=false;
+    State.dragPatientId=null;
+  }
+  detachDragListeners();
+  dragState=null;
+  // After drag ends, do a full re-render to refresh queue
+  if(!State.gameOver) render();
+}
+
+function onDragCancel(e){
+  if(!dragState)return;
+  if(dragState.activated)cleanupDrag();
+  else {
+    State.dragging=false;
+    State.dragPatientId=null;
+  }
+  detachDragListeners();
+  dragState=null;
+  if(!State.gameOver) render();
+}
+
+function cleanupDrag(){
+  if(dragState.cardEl)dragState.cardEl.classList.remove('dragging');
+  if(dragState.ghost&&dragState.ghost.parentNode)dragState.ghost.parentNode.removeChild(dragState.ghost);
+  document.querySelectorAll('.room').forEach(r=>r.classList.remove('drop-valid','drop-invalid','drop-hover'));
+  State.dragging=false;
+  State.dragPatientId=null;
+}
+
+function detachDragListeners(){
+  if(!dragState)return;
+  const card=dragState.cardEl;
+  if(card){
+    card.removeEventListener('pointermove',onDragMove);
+    card.removeEventListener('pointerup',onDragEnd);
+    card.removeEventListener('pointercancel',onDragCancel);
+    try{card.releasePointerCapture(dragState.pointerId);}catch(e){}
+  }
+}
+
+/* =============== TOAST =============== */
+function toast(msg,kind){
+  const wrap=$('toastWrap');
+  const el=document.createElement('div');
+  el.className='toast '+(kind||'');
+  el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(),2200);
+}
+
+/* =============== SCREEN NAV =============== */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  State.screen=id;
+  window.scrollTo(0,0);
+}
+
+/* =============== GAME FLOW =============== */
+function startLevel(n){
+  // Clean any active drag
+  if(dragState){cleanupDrag();detachDragListeners();dragState=null;}
+  State.level=n;
+  State.levelCfg=LEVELS[n];
+  State.patients=[];
+  State.score=0;State.correct=0;State.wrong=0;State.deteriorated=0;
+  State.processed=0;State.critMiss=0;State.totalWait=0;
+  State.shiftTime=0;
+  State.lastSpawn=-State.levelCfg.spawnEvery*1000+2000;
+  State.nextPatientId=1;
+  State.gameOver=false;State.paused=false;
+  State.diagnosticCooldown=0;State.dragging=false;
+  initRooms();initStaff();
+  showScreen('screen-game');
+  render();
+  startClock();
+}
+
+function endShift(){
+  State.gameOver=true;
+  stopClock();
+  if(dragState){cleanupDrag();detachDragListeners();dragState=null;}
+  const target=State.levelCfg.target;
+  const reached=State.processed;
+  const totalAttempts=State.correct+State.wrong+State.deteriorated;
+  const acc=totalAttempts===0?0:State.correct/totalAttempts;
+  let grade='F',msg='Shift cut short.',sub='Try again, doctor.';
+  if(reached>=target&&acc>=0.9&&State.critMiss===0){grade='A';msg='Outstanding shift.';sub='Calm, fast, accurate. Textbook triage.';}
+  else if(reached>=target&&acc>=0.8&&State.critMiss<=1){grade='B';msg='Strong performance.';sub='A few rough edges. Still a solid shift.';}
+  else if(reached>=target&&acc>=0.65){grade='C';msg='Acceptable shift.';sub='You got through it. Work on the misses.';}
+  else if(reached>=target*0.7){grade='D';msg='Tough night.';sub='Plenty to learn from. Run it again.';}
+  else{grade='F';msg='Shift compromised.';sub='Critical misses ended the run. Try again.';}
+  $('gradeCircle').className='grade-circle '+grade;
+  $('gradeCircle').textContent=grade;
+  $('gradeMessage').textContent=msg;
+  $('gradeSub').textContent=sub;
+  $('endScore').textContent=Math.max(0,State.score);
+  $('endProcessed').textContent=State.processed+' / '+target;
+  $('endCorrect').textContent=State.correct;
+  $('endCritMiss').textContent=State.critMiss;
+  $('endLevelLabel').textContent='Level '+State.level+': '+State.levelCfg.name;
+  $('advanceBtn').style.display=State.level>=5?'none':'inline-flex';
+  $('endOverlay').classList.add('active');
+  handleEndOfShiftLeaderboard();
+}
+
+function togglePause(){
+  if(State.gameOver)return;
+  State.paused=!State.paused;
+  if(State.paused)toast('Paused','warn');
+  renderTopBar();
+}
+
+function restartLevel(){
+  if(confirm('Restart this level? Progress will be lost.')){
+    stopClock();
+    startLevel(State.level);
+  }
+}
+
+function openHelp(){
+  if(State.screen==='screen-game'&&!State.paused)State.paused=true;
+  $('helpOverlay').classList.add('active');
+  renderTopBar();
+}
+function closeHelp(){
+  $('helpOverlay').classList.remove('active');
+  if(State.screen==='screen-game'){State.paused=false;renderTopBar();}
+}
+
+function runDiagnostic(patientId){
+  const p=State.patients.find(x=>x.id===patientId);
+  if(!p||State.diagnosticCooldown>0)return;
+  State.diagnosticCooldown=5000;
+  p.vitalsRevealed=true;
+  if(p.status==='queued')p.timer=Math.max(0,p.timer-5000);
+  toast('Diagnostic complete. Vitals revealed.','warn');
+  render();
+}
+
+/* =============== LEVELS UI =============== */
+function renderLevels(){
+  const g=$('levelsGrid');g.innerHTML='';
+  for(let i=1;i<=5;i++){
+    const lv=LEVELS[i];
+    const btn=document.createElement('button');
+    btn.className='level-card';
+    btn.innerHTML='<div class="level-num">'+i+'</div>'
+      +'<div class="level-info"><h4>'+lv.name+'</h4><p>'+lv.desc+'</p></div>'
+      +'<div class="level-arrow">&#10095;</div>';
+    btn.addEventListener('click',()=>startLevel(i));
+    g.appendChild(btn);
+  }
+}
+
+/* =============== LEADERBOARD =============== */
+let lbUnsubscribe=null;
+let lastSubmittedDocId=null;
+
+// Returns 'YYYY-MM-DD' in Europe/London, handling BST/GMT automatically
+function ukDateString(d){
+  const date=d||new Date();
+  const parts=new Intl.DateTimeFormat('en-CA',{
+    timeZone:'Europe/London',
+    year:'numeric',month:'2-digit',day:'2-digit'
+  }).formatToParts(date);
+  const y=parts.find(p=>p.type==='year').value;
+  const m=parts.find(p=>p.type==='month').value;
+  const dd=parts.find(p=>p.type==='day').value;
+  return y+'-'+m+'-'+dd;
+}
+
+function sanitiseUsername(raw){
+  if(typeof raw!=='string')return '';
+  let s=raw.replace(/[\u0000-\u001F\u007F]/g,'').replace(/\s+/g,' ').trim();
+  return s;
+}
+
+function validateUsername(name){
+  if(!name)return 'Please enter a display name.';
+  if(name.length>30)return 'Please keep it to 30 characters or fewer.';
+  if(!/^[\p{L}\p{N} .,'\-_&()]+$/u.test(name))return 'Please use letters, numbers, or basic punctuation only.';
+  return '';
+}
+
+function handleUsernameContinue(){
+  const raw=$('usernameInput').value;
+  const clean=sanitiseUsername(raw);
+  const err=validateUsername(clean);
+  const errEl=$('usernameError');
+  if(err){errEl.textContent=err;return;}
+  errEl.textContent='';
+  State.username=clean;
+  try{sessionStorage.setItem('ihfTriageUsername',clean);}catch(e){}
+  showScreen('screen-intro');
+}
+
+async function submitScoreToLeaderboard(){
+  lastSubmittedDocId=null;
+  if(!window.FB||!State.username){return false;}
+  const {db,collection,addDoc,serverTimestamp}=window.FB;
+  const target=(State.levelCfg&&State.levelCfg.target)||0;
+  const processed=Number(State.processed)||0;
+  const completed=target>0&&processed>=target;
+  const payload={
+    username:State.username,
+    level:Number(State.level),
+    score:Math.max(0,Number(State.score)),
+    correct:Number(State.correct)||0,
+    processed:processed,
+    critMiss:Number(State.critMiss)||0,
+    completed:completed,
+    sessionDate:ukDateString(),
+    timestamp:serverTimestamp()
+  };
+  try{
+    const ref=await addDoc(collection(db,'scores'),payload);
+    lastSubmittedDocId=ref.id;
+    return true;
+  }catch(e){
+    console.error('Score submit failed',e);
+    return false;
+  }
+}
+
+let lbView='level'; // 'level' or 'overall'
+let lbLastRawDocs=[]; // cached docs from most recent snapshot for re-rendering on tab switch
+
+function subscribeLeaderboard(){
+  if(!window.FB){
+    $('lbStatus').textContent='Leaderboard unavailable.';
+    return;
+  }
+  const {db,collection,query,where,orderBy,limit,onSnapshot}=window.FB;
+  const today=ukDateString();
+  if(lbUnsubscribe){lbUnsubscribe();lbUnsubscribe=null;}
+  if(lbView==='level'){
+    // This-level leaderboard: today + this level, ordered by score
+    const q=query(
+      collection(db,'scores'),
+      where('sessionDate','==',today),
+      where('level','==',Number(State.level)),
+      orderBy('score','desc'),
+      limit(50)
+    );
+    lbUnsubscribe=onSnapshot(q,snap=>{
+      lbLastRawDocs=[];snap.forEach(d=>lbLastRawDocs.push({id:d.id,...d.data()}));
+      renderLevelLeaderboard(lbLastRawDocs);
+    },err=>{
+      console.error('Leaderboard read failed',err);
+      $('lbStatus').textContent='Could not load leaderboard.';
+      $('lbStatus').style.display='block';
+      $('leaderboardList').style.display='none';
+    });
+  }else{
+    // Overall run: today + completed levels only, grouped client-side by username
+    const q=query(
+      collection(db,'scores'),
+      where('sessionDate','==',today),
+      where('completed','==',true)
+    );
+    lbUnsubscribe=onSnapshot(q,snap=>{
+      lbLastRawDocs=[];snap.forEach(d=>lbLastRawDocs.push({id:d.id,...d.data()}));
+      renderOverallLeaderboard(lbLastRawDocs);
+    },err=>{
+      console.error('Overall leaderboard read failed',err);
+      $('lbStatus').textContent='Could not load leaderboard.';
+      $('lbStatus').style.display='block';
+      $('leaderboardList').style.display='none';
+    });
+  }
+}
+
+function renderLevelLeaderboard(rows){
+  const list=$('leaderboardList');
+  const status=$('lbStatus');
+  const countEl=$('lbCount');
+  if(!rows||rows.length===0){
+    status.textContent='No Level '+State.level+' scores yet today. Be the first.';
+    status.style.display='block';
+    list.style.display='none';
+    countEl.style.display='none';
+    return;
+  }
+  // Count unique delegates who submitted a score at this level today
+  const uniqueUsers=new Set();
+  rows.forEach(r=>{if(r.username)uniqueUsers.add(r.username);});
+  const n=uniqueUsers.size;
+  countEl.textContent=n+' '+(n===1?'delegate':'delegates')+' at Level '+State.level+' today';
+  countEl.style.display='block';
+  status.style.display='none';
+  list.style.display='block';
+  list.innerHTML=rows.map((r,i)=>{
+    const isMe=(r.id===lastSubmittedDocId);
+    const name=(r.username||'Anonymous').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const sc=Math.max(0,Number(r.score)||0);
+    return '<div class="lb-row'+(isMe?' me':'')+'">'
+      +'<div class="lb-rank">'+(i+1)+'</div>'
+      +'<div class="lb-name">'+name+'</div>'
+      +'<div class="lb-level">L'+(Number(r.level)||1)+'</div>'
+      +'<div class="lb-score">'+sc+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function renderOverallLeaderboard(rows){
+  const list=$('leaderboardList');
+  const status=$('lbStatus');
+  // Group by username, keep only first attempt per level per user (earliest timestamp)
+  const byUser=new Map();
+  rows.forEach(r=>{
+    const u=r.username||'Anonymous';
+    const lv=Number(r.level)||0;
+    if(!byUser.has(u))byUser.set(u,{levels:new Map()});
+    const bucket=byUser.get(u);
+    const existing=bucket.levels.get(lv);
+    const ts=r.timestamp&&r.timestamp.toMillis?r.timestamp.toMillis():0;
+    if(!existing||ts<existing._ts){
+      bucket.levels.set(lv,{score:Math.max(0,Number(r.score)||0),_ts:ts,level:lv});
+    }
+  });
+  const agg=[];
+  byUser.forEach((bucket,username)=>{
+    let total=0,highest=0;
+    bucket.levels.forEach(v=>{total+=v.score;if(v.level>highest)highest=v.level;});
+    agg.push({username,total,levelsCount:bucket.levels.size,highest});
+  });
+  agg.sort((a,b)=>b.total-a.total||b.levelsCount-a.levelsCount||b.highest-a.highest);
+  const top=agg.slice(0,50);
+  const countEl=$('lbCount');
+  if(top.length===0){
+    status.textContent='No completed levels yet today. Complete a level to appear here.';
+    status.style.display='block';
+    list.style.display='none';
+    countEl.style.display='none';
+    return;
+  }
+  const n=agg.length;
+  countEl.textContent=n+' '+(n===1?'delegate has':'delegates have')+' completed at least one level today';
+  countEl.style.display='block';
+  status.style.display='none';
+  list.style.display='block';
+  list.innerHTML=top.map((r,i)=>{
+    const isMe=(r.username===State.username);
+    const name=r.username.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<div class="lb-row overall'+(isMe?' me':'')+'">'
+      +'<div class="lb-rank">'+(i+1)+'</div>'
+      +'<div class="lb-name">'+name+'</div>'
+      +'<div class="lb-levels">'+r.levelsCount+'&times;</div>'
+      +'<div class="lb-best">H'+r.highest+'</div>'
+      +'<div class="lb-score">'+r.total+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function switchLbView(next){
+  if(next===lbView)return;
+  lbView=next;
+  $('lbTabLevel').classList.toggle('active',lbView==='level');
+  $('lbTabOverall').classList.toggle('active',lbView==='overall');
+  $('lbTitleText').textContent=lbView==='level'?"Today's Leaderboard":"Overall Run Today";
+  $('lbStatus').textContent='Loading...';
+  $('lbStatus').style.display='block';
+  $('leaderboardList').style.display='none';
+  $('leaderboardList').innerHTML='';
+  $('lbCount').style.display='none';
+  subscribeLeaderboard();
+}
+
+async function loadHistoricalAverages(level,myScore){
+  $('histTitle').textContent='Historical Averages: Level '+level;
+  $('histStatus').textContent='Loading historical data...';
+  $('histStatus').style.display='block';
+  $('histBody').style.display='none';
+  if(!window.FB){
+    $('histStatus').textContent='Historical data unavailable.';
+    return;
+  }
+  const {db,collection,query,where,getDocs}=window.FB;
+  try{
+    const q=query(collection(db,'scores'),where('level','==',Number(level)));
+    const snap=await getDocs(q);
+    let n=0,sumScore=0,sumCorrect=0;
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const sc=Math.max(0,Number(d.score)||0);
+      const co=Number(d.correct)||0;
+      sumScore+=sc;sumCorrect+=co;n++;
+    });
+    if(n===0){
+      $('histStatus').textContent='No historical shifts recorded at Level '+level+' yet.';
+      return;
+    }
+    const avgScore=Math.round(sumScore/n);
+    const avgCorrect=Math.round((sumCorrect/n)*10)/10;
+    $('histAvgScore').textContent=avgScore;
+    $('histAvgCorrect').textContent=avgCorrect;
+    $('histCount').textContent=n;
+    // Comparison line: within 10% counts as in line
+    const cmp=$('histCompare');
+    const diff=myScore-avgScore;
+    const pct=avgScore>0?Math.abs(diff)/avgScore:0;
+    let cls,msg;
+    if(pct<=0.10){
+      cls='inline';
+      msg='Your score of '+myScore+' is in line with the average for Level '+level+' (avg '+avgScore+' across '+n+' shifts).';
+    }else if(diff>0){
+      cls='above';
+      msg='Your score of '+myScore+' is above average for Level '+level+' (avg '+avgScore+' across '+n+' shifts).';
+    }else{
+      cls='below';
+      msg='Your score of '+myScore+' is below average for Level '+level+' (avg '+avgScore+' across '+n+' shifts).';
+    }
+    cmp.className='hist-compare '+cls;
+    cmp.textContent=msg;
+    $('histStatus').style.display='none';
+    $('histBody').style.display='block';
+  }catch(e){
+    console.error('Historical fetch failed',e);
+    $('histStatus').textContent='Could not load historical data.';
+  }
+}
+
+async function handleEndOfShiftLeaderboard(){
+  // Reset to This Level view each time the modal opens
+  lbView='level';
+  $('lbTabLevel').classList.add('active');
+  $('lbTabOverall').classList.remove('active');
+  $('lbTitleText').textContent="Today's Leaderboard";
+  // Reset UI
+  $('lbStatus').textContent='Submitting your score...';
+  $('lbStatus').style.display='block';
+  $('leaderboardList').style.display='none';
+  $('leaderboardList').innerHTML='';
+  $('lbCount').style.display='none';
+  const myScore=Math.max(0,Number(State.score)||0);
+  const myLevel=Number(State.level);
+  const ok=await submitScoreToLeaderboard();
+  if(!ok){
+    $('lbStatus').textContent='Score could not be submitted. Leaderboard shown below.';
+  }
+  subscribeLeaderboard();
+  loadHistoricalAverages(myLevel,myScore);
+}
+
+/* =============== FACILITATOR VIEW =============== */
+let facUnsubscribe=null;
+let facView='level'; // 'level' or 'overall'
+let facLevel=1;
+
+function facSubscribe(){
+  if(facUnsubscribe){facUnsubscribe();facUnsubscribe=null;}
+  if(!window.FB){
+    $('facLbStatus').textContent='Leaderboard unavailable.';
+    return;
+  }
+  const {db,collection,query,where,orderBy,limit,onSnapshot}=window.FB;
+  const today=ukDateString();
+  $('facLbStatus').textContent='Loading...';
+  $('facLbStatus').style.display='block';
+  $('facLeaderboardList').style.display='none';
+  $('facLbCount').style.display='none';
+  if(facView==='level'){
+    const q=query(
+      collection(db,'scores'),
+      where('sessionDate','==',today),
+      where('level','==',Number(facLevel)),
+      orderBy('score','desc'),
+      limit(50)
+    );
+    facUnsubscribe=onSnapshot(q,snap=>{
+      const rows=[];snap.forEach(d=>rows.push({id:d.id,...d.data()}));
+      facRenderLevel(rows);
+    },err=>{
+      console.error('Facilitator level read failed',err);
+      $('facLbStatus').textContent='Could not load leaderboard.';
+    });
+  }else{
+    const q=query(
+      collection(db,'scores'),
+      where('sessionDate','==',today),
+      where('completed','==',true)
+    );
+    facUnsubscribe=onSnapshot(q,snap=>{
+      const rows=[];snap.forEach(d=>rows.push({id:d.id,...d.data()}));
+      facRenderOverall(rows);
+    },err=>{
+      console.error('Facilitator overall read failed',err);
+      $('facLbStatus').textContent='Could not load leaderboard.';
+    });
+  }
+}
+
+function facRenderLevel(rows){
+  const list=$('facLeaderboardList');
+  const status=$('facLbStatus');
+  const countEl=$('facLbCount');
+  if(!rows||rows.length===0){
+    status.textContent='No Level '+facLevel+' scores yet today.';
+    status.style.display='block';
+    list.style.display='none';
+    countEl.style.display='none';
+    return;
+  }
+  const uniqueUsers=new Set();
+  rows.forEach(r=>{if(r.username)uniqueUsers.add(r.username);});
+  const n=uniqueUsers.size;
+  countEl.textContent=n+' '+(n===1?'delegate':'delegates')+' at Level '+facLevel+' today';
+  countEl.style.display='block';
+  status.style.display='none';
+  list.style.display='block';
+  list.innerHTML=rows.map((r,i)=>{
+    const name=(r.username||'Anonymous').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const sc=Math.max(0,Number(r.score)||0);
+    return '<div class="lb-row">'
+      +'<div class="lb-rank">'+(i+1)+'</div>'
+      +'<div class="lb-name">'+name+'</div>'
+      +'<div class="lb-level">L'+(Number(r.level)||1)+'</div>'
+      +'<div class="lb-score">'+sc+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function facRenderOverall(rows){
+  const list=$('facLeaderboardList');
+  const status=$('facLbStatus');
+  const countEl=$('facLbCount');
+  const byUser=new Map();
+  rows.forEach(r=>{
+    const u=r.username||'Anonymous';
+    const lv=Number(r.level)||0;
+    if(!byUser.has(u))byUser.set(u,{levels:new Map()});
+    const bucket=byUser.get(u);
+    const existing=bucket.levels.get(lv);
+    const ts=r.timestamp&&r.timestamp.toMillis?r.timestamp.toMillis():0;
+    if(!existing||ts<existing._ts){
+      bucket.levels.set(lv,{score:Math.max(0,Number(r.score)||0),_ts:ts,level:lv});
+    }
+  });
+  const agg=[];
+  byUser.forEach((bucket,username)=>{
+    let total=0,highest=0;
+    bucket.levels.forEach(v=>{total+=v.score;if(v.level>highest)highest=v.level;});
+    agg.push({username,total,levelsCount:bucket.levels.size,highest});
+  });
+  agg.sort((a,b)=>b.total-a.total||b.levelsCount-a.levelsCount||b.highest-a.highest);
+  const top=agg.slice(0,50);
+  if(top.length===0){
+    status.textContent='No completed levels yet today.';
+    status.style.display='block';
+    list.style.display='none';
+    countEl.style.display='none';
+    return;
+  }
+  const n=agg.length;
+  countEl.textContent=n+' '+(n===1?'delegate has':'delegates have')+' completed at least one level today';
+  countEl.style.display='block';
+  status.style.display='none';
+  list.style.display='block';
+  list.innerHTML=top.map((r,i)=>{
+    const name=r.username.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<div class="lb-row overall">'
+      +'<div class="lb-rank">'+(i+1)+'</div>'
+      +'<div class="lb-name">'+name+'</div>'
+      +'<div class="lb-levels">'+r.levelsCount+'&times;</div>'
+      +'<div class="lb-best">H'+r.highest+'</div>'
+      +'<div class="lb-score">'+r.total+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function facSwitchView(next){
+  if(next===facView)return;
+  facView=next;
+  $('facTabLevel').classList.toggle('active',facView==='level');
+  $('facTabOverall').classList.toggle('active',facView==='overall');
+  $('facLbTitle').textContent=facView==='level'?"Today's Leaderboard":"Overall Run Today";
+  $('facLevelPickerWrap').style.display=facView==='level'?'block':'none';
+  facSubscribe();
+}
+
+function openFacilitator(){
+  facView='level';
+  facLevel=Number($('facLevelPicker').value)||1;
+  $('facTabLevel').classList.add('active');
+  $('facTabOverall').classList.remove('active');
+  $('facLbTitle').textContent="Today's Leaderboard";
+  $('facLevelPickerWrap').style.display='block';
+  showScreen('screen-facilitator');
+  facSubscribe();
+}
+
+function closeFacilitator(){
+  if(facUnsubscribe){facUnsubscribe();facUnsubscribe=null;}
+  showScreen('screen-username');
+}
+
+/* =============== WIRING =============== */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderLevels();
+
+  // Restore any previously chosen username in this browser session
+  try{
+    const saved=sessionStorage.getItem('ihfTriageUsername');
+    if(saved){$('usernameInput').value=saved;}
+  }catch(e){}
+
+  $('usernameContinue').addEventListener('click',handleUsernameContinue);
+  $('usernameInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();handleUsernameContinue();}
+  });
+  $('usernameInput').addEventListener('input',()=>{$('usernameError').textContent='';});
+
+  $('lbTabLevel').addEventListener('click',()=>switchLbView('level'));
+  $('lbTabOverall').addEventListener('click',()=>switchLbView('overall'));
+
+  $('facilitatorLink').addEventListener('click',openFacilitator);
+  $('facilitatorBack').addEventListener('click',closeFacilitator);
+  $('facTabLevel').addEventListener('click',()=>facSwitchView('level'));
+  $('facTabOverall').addEventListener('click',()=>facSwitchView('overall'));
+  $('facLevelPicker').addEventListener('change',()=>{
+    facLevel=Number($('facLevelPicker').value)||1;
+    if(facView==='level')facSubscribe();
+  });
+
+  // When the end overlay closes for any reason, tear down the live listener
+  $('advanceBtn').addEventListener('click',()=>{if(lbUnsubscribe){lbUnsubscribe();lbUnsubscribe=null;}});
+  $('retryBtn').addEventListener('click',()=>{if(lbUnsubscribe){lbUnsubscribe();lbUnsubscribe=null;}});
+  $('endLevelsBtn').addEventListener('click',()=>{if(lbUnsubscribe){lbUnsubscribe();lbUnsubscribe=null;}});
+
+  $('startShift').addEventListener('click',()=>startLevel(1));
+  $('goLevels').addEventListener('click',()=>showScreen('screen-levels'));
+  document.querySelectorAll('[data-screen]').forEach(el=>{
+    el.addEventListener('click',()=>showScreen(el.dataset.screen));
+  });
+  $('pauseBtn').addEventListener('click',togglePause);
+  $('restartBtn').addEventListener('click',restartLevel);
+  $('helpBtn').addEventListener('click',openHelp);
+  $('helpClose').addEventListener('click',closeHelp);
+  $('helpResume').addEventListener('click',closeHelp);
+  $('advanceBtn').addEventListener('click',()=>{$('endOverlay').classList.remove('active');if(State.level<5)startLevel(State.level+1);});
+  $('retryBtn').addEventListener('click',()=>{$('endOverlay').classList.remove('active');startLevel(State.level);});
+  $('endLevelsBtn').addEventListener('click',()=>{$('endOverlay').classList.remove('active');showScreen('screen-levels');});
+
+  document.addEventListener('keydown',e=>{
+    if(State.screen!=='screen-game')return;
+    if(e.code==='Space'){e.preventDefault();togglePause();}
+    else if(e.code==='Escape'){
+      if(dragState){cleanupDrag();detachDragListeners();dragState=null;render();}
+    }
+  });
+
+  // Cancel drag if pointer leaves window
+  window.addEventListener('pointercancel',e=>{
+    if(dragState){onDragCancel(e);}
+  });
+  window.addEventListener('blur',()=>{
+    if(dragState){cleanupDrag();detachDragListeners();dragState=null;if(!State.gameOver)render();}
+  });
+
+  // Safety net: if a stray pointerup ever reaches the document while
+  // State.dragging is stuck true but no active drag exists, unfreeze.
+  document.addEventListener('pointerup',()=>{
+    if(!dragState && State.dragging){
+      State.dragging=false;
+      State.dragPatientId=null;
+      if(!State.gameOver)render();
+    }
+  });
+});
+</script>
+</body>
+</html>
